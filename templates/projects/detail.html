@@ -176,6 +176,37 @@ document.addEventListener('DOMContentLoaded', function() {
                         <small>Progress: ${task.progress}%</small>
                     </div>`;
                 },
+                on_date_change: function(task, start, end) {
+                    var numericId = task.id.replace('task-', '');
+                    var startStr = start.toISOString().slice(0, 10);
+                    var endStr = end.toISOString().slice(0, 10);
+                    // Update local lookup
+                    if (taskMap[task.id]) {
+                        taskMap[task.id].start = startStr;
+                        taskMap[task.id].end = endStr;
+                    }
+                    fetch('/tasks/' + numericId + '/quick-update', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ start_date: startStr, end_date: endStr })
+                    });
+                },
+                on_progress_change: function(task, progress) {
+                    var numericId = task.id.replace('task-', '');
+                    // Map progress to status
+                    var status = 'todo';
+                    if (progress >= 100) status = 'done';
+                    else if (progress > 0) status = 'in_progress';
+                    if (taskMap[task.id]) {
+                        var cls = taskMap[task.id].custom_class.replace(/status-\w+/, 'status-' + status);
+                        taskMap[task.id].custom_class = cls;
+                    }
+                    fetch('/tasks/' + numericId + '/quick-update', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ status: status })
+                    });
+                },
                 on_click: function(task) {
                     currentTaskId = task.id;
                     var numericId = task.id.replace('task-', '');
