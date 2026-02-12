@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from models import db, Task, Project, Person, Tag, StatusUpdate, TaskDependency
 from datetime import date
 
@@ -108,6 +108,21 @@ def add_status_update(id):
         db.session.add(update)
         db.session.commit()
     return redirect(url_for('tasks.detail', id=task.id))
+
+
+@bp.route('/tasks/<int:id>/quick-update', methods=['POST'])
+def quick_update(id):
+    """AJAX endpoint for inline Gantt edits (start, end, status)."""
+    task = Task.query.get_or_404(id)
+    data = request.get_json()
+    if 'start_date' in data:
+        task.start_date = date.fromisoformat(data['start_date'])
+    if 'end_date' in data:
+        task.end_date = date.fromisoformat(data['end_date'])
+    if 'status' in data and data['status'] in ('todo', 'in_progress', 'done'):
+        task.status = data['status']
+    db.session.commit()
+    return jsonify({'ok': True, 'progress': task.progress})
 
 
 @bp.route('/tasks/<int:id>/delete', methods=['POST'])
