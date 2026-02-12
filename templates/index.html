@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Taskmaster{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card card-hover">
+            <div class="stat-number">{{ active_projects }}</div>
+            <div class="stat-label">Active Projects</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card card-hover">
+            <div class="stat-number">{{ total_tasks }}</div>
+            <div class="stat-label">Total Tasks</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card card-hover">
+            <div class="stat-number text-primary">{{ in_progress_tasks }}</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card card-hover">
+            <div class="stat-number {% if overdue_tasks > 0 %}text-danger{% endif %}">{{ overdue_tasks }}</div>
+            <div class="stat-label">Overdue</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Projects</h5>
+                <a href="{{ url_for('projects.new_project') }}" class="btn btn-sm btn-primary">New Project</a>
+            </div>
+            <div class="card-body">
+                {% if recent_projects %}
+                <div class="list-group list-group-flush">
+                    {% for project in recent_projects %}
+                    <a href="{{ url_for('projects.detail', id=project.id) }}"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ project.name }}</strong>
+                            {% if project.description %}
+                            <br><small class="text-muted">{{ project.description[:80] }}{% if project.description|length > 80 %}...{% endif %}</small>
+                            {% endif %}
+                        </div>
+                        <span class="badge badge-{{ project.status }} rounded-pill">
+                            {{ project.status | replace('_', ' ') | title }}
+                        </span>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No projects yet. <a href="{{ url_for('projects.new_project') }}">Create one</a>.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header"><h5 class="mb-0">Task Breakdown</h5></div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Todo</span><span class="badge badge-todo">{{ todo_tasks }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span>In Progress</span><span class="badge badge-in_progress">{{ in_progress_tasks }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Done</span><span class="badge badge-done">{{ done_tasks }}</span>
+                </div>
+                {% if total_tasks > 0 %}
+                <div class="workload-bar mt-3">
+                    <div class="segment segment-done" style="width: {{ (done_tasks / total_tasks * 100)|round }}%"></div>
+                    <div class="segment segment-in_progress" style="width: {{ (in_progress_tasks / total_tasks * 100)|round }}%"></div>
+                    <div class="segment segment-todo" style="width: {{ (todo_tasks / total_tasks * 100)|round }}%"></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Teams</h5></div>
+            <div class="card-body">
+                {% for team in teams %}
+                <div class="d-flex justify-content-between mb-1">
+                    <span>{{ team.name }}</span>
+                    <span class="text-muted">{{ team.members|length }} members</span>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No teams yet. <a href="{{ url_for('teams.new_team') }}">Create one</a>.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

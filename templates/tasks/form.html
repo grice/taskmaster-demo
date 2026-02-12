@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if task else 'New' }} Task - Taskmaster{% endblock %}
+
+{% block content %}
+<h1>{{ 'Edit' if task else 'New' }} Task</h1>
+
+<form method="post" class="mt-3" style="max-width: 600px;">
+    <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" class="form-control" id="title" name="title"
+               value="{{ task.title if task else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3">{{ task.description if task else '' }}</textarea>
+    </div>
+
+    <div class="mb-3">
+        <label for="project_id" class="form-label">Project</label>
+        <select class="form-select" id="project_id" name="project_id" required>
+            {% for proj in projects %}
+            <option value="{{ proj.id }}"
+                {{ 'selected' if (task and task.project_id == proj.id) or (not task and project_id == proj.id) else '' }}>
+                {{ proj.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="assignee_id" class="form-label">Assignee</label>
+        <select class="form-select" id="assignee_id" name="assignee_id">
+            <option value="">Unassigned</option>
+            {% for person in people %}
+            <option value="{{ person.id }}" {{ 'selected' if task and task.assignee_id == person.id else '' }}>
+                {{ person.name }}{% if person.team %} ({{ person.team.name }}){% endif %}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="start_date" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="start_date" name="start_date"
+                   value="{{ task.start_date if task else '' }}" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="end_date" name="end_date"
+                   value="{{ task.end_date if task else '' }}" required>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+                {% for s in ['todo', 'in_progress', 'done'] %}
+                <option value="{{ s }}" {{ 'selected' if task and task.status == s else '' }}>
+                    {{ s | replace('_', ' ') | title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="priority" class="form-label">Priority</label>
+            <select class="form-select" id="priority" name="priority">
+                {% for p in ['low', 'medium', 'high', 'critical'] %}
+                <option value="{{ p }}" {{ 'selected' if task and task.priority == p else '' }}>
+                    {{ p | title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="tags" class="form-label">Tags (comma-separated)</label>
+        <input type="text" class="form-control" id="tags" name="tags"
+               value="{{ task.tags|map(attribute='name')|join(', ') if task else '' }}"
+               placeholder="e.g. frontend, urgent, v2">
+    </div>
+
+    {% if available_deps %}
+    <div class="mb-3">
+        <label class="form-label">Blocked By (Dependencies)</label>
+        {% for dep_task in available_deps %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="dependencies"
+                   value="{{ dep_task.id }}" id="dep-{{ dep_task.id }}"
+                   {{ 'checked' if task and dep_task in task.dependencies else '' }}>
+            <label class="form-check-label" for="dep-{{ dep_task.id }}">
+                {{ dep_task.title }}
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">{{ 'Update' if task else 'Create' }} Task</button>
+    {% if task %}
+    <a href="{{ url_for('tasks.detail', id=task.id) }}" class="btn btn-outline-secondary">Cancel</a>
+    {% else %}
+    <a href="{{ url_for('projects.list_projects') }}" class="btn btn-outline-secondary">Cancel</a>
+    {% endif %}
+</form>
+{% endblock %}

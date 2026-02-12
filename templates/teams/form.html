@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if team else 'New' }} Team - Taskmaster{% endblock %}
+
+{% block content %}
+<h1>{{ 'Edit' if team else 'New' }} Team</h1>
+
+<form method="post" class="mt-3" style="max-width: 600px;">
+    <div class="mb-3">
+        <label for="name" class="form-label">Team Name</label>
+        <input type="text" class="form-control" id="name" name="name"
+               value="{{ team.name if team else '' }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ 'Update' if team else 'Create' }} Team</button>
+    <a href="{{ url_for('teams.list_teams') }}" class="btn btn-outline-secondary">Cancel</a>
+</form>
+{% endblock %}

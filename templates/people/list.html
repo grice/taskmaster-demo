@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}People - Taskmaster{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>People</h1>
+    <a href="{{ url_for('people.new_person') }}" class="btn btn-primary">Add Person</a>
+</div>
+
+{% if people %}
+<div class="row g-3">
+    {% for person in people %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card card-hover h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{{ url_for('people.detail', id=person.id) }}" class="text-decoration-none">
+                        {{ person.name }}
+                    </a>
+                </h5>
+                {% if person.team %}
+                <p class="text-muted small mb-2">{{ person.team.name }}</p>
+                {% endif %}
+                {% if person.email %}
+                <p class="text-muted small mb-2">{{ person.email }}</p>
+                {% endif %}
+
+                {% set total = person.tasks|length %}
+                {% set todo = person.tasks|selectattr('status', 'equalto', 'todo')|list|length %}
+                {% set in_prog = person.tasks|selectattr('status', 'equalto', 'in_progress')|list|length %}
+                {% set done = person.tasks|selectattr('status', 'equalto', 'done')|list|length %}
+
+                <div class="d-flex justify-content-between small mb-1">
+                    <span>{{ total }} tasks</span>
+                    <span>{{ in_prog }} active</span>
+                </div>
+                {% if total > 0 %}
+                <div class="workload-bar">
+                    <div class="segment segment-done" style="width: {{ (done / total * 100)|round }}%"
+                         title="{{ done }} done"></div>
+                    <div class="segment segment-in_progress" style="width: {{ (in_prog / total * 100)|round }}%"
+                         title="{{ in_prog }} in progress"></div>
+                    <div class="segment segment-todo" style="width: {{ (todo / total * 100)|round }}%"
+                         title="{{ todo }} todo"></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <p class="text-muted">No people yet.</p>
+    <a href="{{ url_for('people.new_person') }}" class="btn btn-primary">Add the first person</a>
+</div>
+{% endif %}
+{% endblock %}

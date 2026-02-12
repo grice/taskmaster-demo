@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}{{ person.name }} - Taskmaster{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1>{{ person.name }}</h1>
+        {% if person.team %}<p class="text-muted">{{ person.team.name }}</p>{% endif %}
+        {% if person.email %}<p class="text-muted">{{ person.email }}</p>{% endif %}
+    </div>
+    <div>
+        <a href="{{ url_for('people.edit_person', id=person.id) }}" class="btn btn-outline-secondary btn-sm">Edit</a>
+        <form method="post" action="{{ url_for('people.delete_person', id=person.id) }}" class="d-inline"
+              onsubmit="return confirm('Delete this person?')">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+        </form>
+    </div>
+</div>
+
+<!-- Summary stats -->
+{% set total = person.tasks|length %}
+{% set todo = person.tasks|selectattr('status', 'equalto', 'todo')|list|length %}
+{% set in_prog = person.tasks|selectattr('status', 'equalto', 'in_progress')|list|length %}
+{% set done_count = person.tasks|selectattr('status', 'equalto', 'done')|list|length %}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card stat-card"><div class="stat-number">{{ total }}</div><div class="stat-label">Total Tasks</div></div></div>
+    <div class="col-md-3"><div class="card stat-card"><div class="stat-number text-muted">{{ todo }}</div><div class="stat-label">Todo</div></div></div>
+    <div class="col-md-3"><div class="card stat-card"><div class="stat-number text-primary">{{ in_prog }}</div><div class="stat-label">In Progress</div></div></div>
+    <div class="col-md-3"><div class="card stat-card"><div class="stat-number text-success">{{ done_count }}</div><div class="stat-label">Done</div></div></div>
+</div>
+
+<!-- Timeline view -->
+{% if person.tasks %}
+<div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Timeline</h5></div>
+    <div class="card-body">
+        {% set all_tasks = person.tasks %}
+        {% set min_date = all_tasks|map(attribute='start_date')|min %}
+        {% set max_date = all_tasks|map(attribute='end_date')|max %}
+        {% set total_days = (max_date - min_date).days if max_date != min_date else 1 %}
+        <div style="position: relative; min-height: {{ all_tasks|length * 32 }}px;">
+            {% for task in all_tasks %}
+            {% set offset_days = (task.start_date - min_date).days %}
+            {% set duration_days = (task.end_date - task.start_date).days %}
+            {% set left_pct = (offset_days / total_days * 100) %}
+            {% set width_pct = (duration_days / total_days * 100) %}
+            <div class="timeline-bar badge-{{ task.status }}"
+                 style="position: absolute; top: {{ loop.index0 * 32 }}px; left: {{ left_pct }}%; width: {{ [width_pct, 5]|max }}%;"
+                 title="{{ task.title }} ({{ task.start_date }} to {{ task.end_date }})">
+                <a href="{{ url_for('tasks.detail', id=task.id) }}" class="text-white text-decoration-none">{{ task.title }}</a>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="d-flex justify-content-between mt-2 small text-muted">
+            <span>{{ min_date }}</span>
+            <span>{{ max_date }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Tasks grouped by project -->
+{% if tasks_by_project %}
+{% for proj_id, group in tasks_by_project.items() %}
+<div class="card mb-3">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <a href="{{ url_for('projects.detail', id=group.project.id) }}" class="text-decoration-none">
+                {{ group.project.name }}
+            </a>
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr><th>Task</th><th>Status</th><th>Priority</th><th>Dates</th></tr>
+                </thead>
+                <tbody>
+                    {% for task in group.tasks %}
+                    <tr>
+                        <td><a href="{{ url_for('tasks.detail', id=task.id) }}">{{ task.title }}</a></td>
+                        <td><span class="badge badge-{{ task.status }}">{{ task.status | replace('_', ' ') | title }}</span></td>
+                        <td><span class="badge badge-{{ task.priority }}">{{ task.priority | title }}</span></td>
+                        <td class="small">{{ task.start_date }} &mdash; {{ task.end_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="text-center py-5">
+    <p class="text-muted">No tasks assigned to this person yet.</p>
+</div>
+{% endif %}
+{% endblock %}

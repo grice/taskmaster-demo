@@ -1,0 +1,7 @@
+name: taskmaster
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - flask
+  - flask-sqlalchemy

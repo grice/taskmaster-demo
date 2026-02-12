@@ -1,0 +1,112 @@
+/* Priority badges */
+.badge-low { background-color: #6c757d; }
+.badge-medium { background-color: #0d6efd; }
+.badge-high { background-color: #fd7e14; }
+.badge-critical { background-color: #dc3545; }
+
+/* Status badges */
+.badge-todo { background-color: #6c757d; }
+.badge-in_progress { background-color: #0d6efd; }
+.badge-done { background-color: #198754; }
+
+/* Gantt status coloring */
+.gantt .bar.status-todo .bar-progress,
+.gantt .bar.status-todo .bar-wrapper .bar {
+    fill: #adb5bd;
+}
+.gantt .bar.status-in_progress .bar-progress,
+.gantt .bar.status-in_progress .bar-wrapper .bar {
+    fill: #0d6efd;
+}
+.gantt .bar.status-done .bar-progress,
+.gantt .bar.status-done .bar-wrapper .bar {
+    fill: #198754;
+}
+
+/* Gantt priority accents */
+.gantt .bar.priority-critical .bar-wrapper .bar {
+    stroke: #dc3545;
+    stroke-width: 2;
+}
+.gantt .bar.priority-high .bar-wrapper .bar {
+    stroke: #fd7e14;
+    stroke-width: 2;
+}
+
+/* Workload bars */
+.workload-bar {
+    height: 20px;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    background: #e9ecef;
+}
+.workload-bar .segment {
+    height: 100%;
+    transition: width 0.3s;
+}
+.workload-bar .segment-todo { background-color: #adb5bd; }
+.workload-bar .segment-in_progress { background-color: #0d6efd; }
+.workload-bar .segment-done { background-color: #198754; }
+
+/* Person timeline bars */
+.timeline-bar {
+    height: 24px;
+    border-radius: 4px;
+    position: relative;
+    margin-bottom: 4px;
+    font-size: 0.75rem;
+    line-height: 24px;
+    padding: 0 8px;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Card hover */
+.card-hover:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s;
+}
+
+/* Status update timeline */
+.status-timeline {
+    border-left: 3px solid #dee2e6;
+    padding-left: 1rem;
+    margin-left: 0.5rem;
+}
+.status-timeline .update-item {
+    position: relative;
+    padding-bottom: 1rem;
+}
+.status-timeline .update-item::before {
+    content: '';
+    position: absolute;
+    left: -1.35rem;
+    top: 0.4rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #0d6efd;
+}
+
+/* Dashboard stat cards */
+.stat-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+.stat-card .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+}
+.stat-card .stat-label {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+/* Gantt container */
+.gantt-container {
+    overflow-x: auto;
+    margin: 1rem 0;
+}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if person else 'New' }} Person - Taskmaster{% endblock %}
+
+{% block content %}
+<h1>{{ 'Edit' if person else 'Add' }} Person</h1>
+
+<form method="post" class="mt-3" style="max-width: 600px;">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name"
+               value="{{ person.name if person else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email"
+               value="{{ person.email if person else '' }}">
+    </div>
+    <div class="mb-3">
+        <label for="team_id" class="form-label">Team</label>
+        <select class="form-select" id="team_id" name="team_id">
+            <option value="">No team</option>
+            {% for team in teams %}
+            <option value="{{ team.id }}" {{ 'selected' if person and person.team_id == team.id else '' }}>
+                {{ team.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ 'Update' if person else 'Add' }} Person</button>
+    <a href="{{ url_for('people.list_people') }}" class="btn btn-outline-secondary">Cancel</a>
+</form>
+{% endblock %}
