@@ -7,6 +7,7 @@ Usage:
 import csv
 import os
 import sys
+from datetime import date, datetime
 from app import create_app
 from models import (db, Team, Person, Project, Task, TaskAssignment,
                     TaskDependency, Tag, StatusUpdate, task_tags,
@@ -61,6 +62,13 @@ def export_db(output_dir):
 
 def import_db(input_dir):
     with app.app_context():
+        # Auto-backup before overwriting
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_dir = f'backup_{timestamp}'
+        print(f'Backing up current database to {backup_dir}/...\n')
+        export_db(backup_dir)
+        print(f'\nBackup complete. Proceeding with import...\n')
+
         # Clear all data in reverse order to respect foreign keys
         db.session.execute(status_update_mentions.delete())
         db.session.execute(task_tags.delete())
@@ -87,6 +95,12 @@ def import_db(input_dir):
                     for col in columns:
                         if col.endswith('_id') and row.get(col) is not None:
                             row[col] = int(row[col])
+                        # Date fields (YYYY-MM-DD)
+                        if col.endswith('_date') and col != 'created_at' and row.get(col) is not None:
+                            row[col] = date.fromisoformat(row[col])
+                        # Datetime fields
+                        if col == 'created_at' and row.get(col) is not None:
+                            row[col] = datetime.fromisoformat(row[col])
                     if 'is_lead' in row and row['is_lead'] is not None:
                         row['is_lead'] = row['is_lead'] in ('True', 'true', '1')
                     obj = model(**{c: row[c] for c in columns})
