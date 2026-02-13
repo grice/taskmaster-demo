@@ -68,6 +68,13 @@ def gantt_data(id):
     tasks = []
     for task in project.tasks:
         dep_ids = ','.join(f'task-{d.id}' for d in task.dependencies)
+        lead = task.lead
+        assignee_names = []
+        for a in task.assignments:
+            name = a.person.name
+            if a.is_lead:
+                name += ' (lead)'
+            assignee_names.append(name)
         tasks.append({
             'id': f'task-{task.id}',
             'name': task.title,
@@ -76,5 +83,6 @@ def gantt_data(id):
             'progress': task.progress,
             'dependencies': dep_ids,
             'custom_class': f'status-{task.status} priority-{task.priority}',
+            'assignees': ', '.join(assignee_names) if assignee_names else 'Unassigned',
         })
     return jsonify(tasks)

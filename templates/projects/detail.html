@@ -200,10 +200,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 view_mode: 'Week',
                 date_format: 'YYYY-MM-DD',
                 custom_popup_html: function(task) {
+                    var data = taskMap[task.id] || {};
+                    var assignees = data.assignees || 'Unassigned';
                     return `<div class="p-2">
                         <strong>${task.name}</strong><br>
                         <small>${task.start} to ${task.end}</small><br>
-                        <small>Progress: ${task.progress}%</small>
+                        <small>Progress: ${task.progress}%</small><br>
+                        <small><strong>Assigned:</strong> ${assignees}</small>
                     </div>`;
                 },
                 on_date_change: function(task, start, end) {
@@ -237,34 +240,42 @@ document.addEventListener('DOMContentLoaded', function() {
                         body: JSON.stringify({ status: status })
                     });
                 },
-                on_click: function(task) {
-                    currentTaskId = task.id;
-                    var numericId = task.id.replace('task-', '');
-                    var data = taskMap[task.id];
+            });
 
-                    document.getElementById('popup-title').textContent = task.name;
-                    document.getElementById('popup-start').value = data.start;
-                    document.getElementById('popup-end').value = data.end;
-                    document.getElementById('popup-detail-link').href = '/tasks/' + numericId;
+            // Single-click listener on bar elements (Frappe Gantt binds on_click to dblclick)
+            function showPopup(taskId, e) {
+                var data = taskMap[taskId];
+                if (!data) return;
+                currentTaskId = taskId;
+                var numericId = taskId.replace('task-', '');
 
-                    // Extract status from custom_class (e.g. "status-in_progress priority-high")
-                    var statusMatch = data.custom_class.match(/status-(\w+)/);
-                    if (statusMatch) {
-                        document.getElementById('popup-status').value = statusMatch[1];
-                    }
+                document.getElementById('popup-title').textContent = data.name;
+                document.getElementById('popup-start').value = data.start;
+                document.getElementById('popup-end').value = data.end;
+                document.getElementById('popup-detail-link').href = '/tasks/' + numericId;
 
-                    // Position the popup near the click
-                    var bar = document.querySelector('.bar-wrapper[data-id="' + task.id + '"]');
-                    if (bar) {
-                        var rect = bar.getBoundingClientRect();
-                        popup.style.top = (rect.bottom + 8) + 'px';
-                        popup.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
-                    } else {
-                        popup.style.top = (event.clientY + 10) + 'px';
-                        popup.style.left = Math.min(event.clientX, window.innerWidth - 320) + 'px';
-                    }
-                    popup.style.display = 'block';
+                var statusMatch = data.custom_class.match(/status-(\w+)/);
+                if (statusMatch) {
+                    document.getElementById('popup-status').value = statusMatch[1];
                 }
+
+                var bar = e.target.closest('.bar-wrapper');
+                if (bar) {
+                    var rect = bar.getBoundingClientRect();
+                    popup.style.top = (rect.bottom + 8) + 'px';
+                    popup.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
+                } else {
+                    popup.style.top = (e.clientY + 10) + 'px';
+                    popup.style.left = Math.min(e.clientX, window.innerWidth - 320) + 'px';
+                }
+                popup.style.display = 'block';
+            }
+
+            document.querySelectorAll('.bar-wrapper').forEach(function(bar) {
+                bar.addEventListener('click', function(e) {
+                    var taskId = bar.getAttribute('data-id');
+                    if (taskId) showPopup(taskId, e);
+                });
             });
         });
 });
