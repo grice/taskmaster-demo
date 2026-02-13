@@ -111,10 +111,7 @@
     margin: 1rem 0;
 }
 
-/* Gantt hover tooltip - 2x wider */
+/* Hide Frappe Gantt's built-in click popup */
 .gantt .popup-wrapper {
-    width: 360px;
-}
-.gantt .popup-wrapper .pointer {
-    left: 180px;
+    display: none !important;
 }

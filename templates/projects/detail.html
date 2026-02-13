@@ -115,6 +115,16 @@
 
 {% block scripts %}
 {% if project.tasks %}
+<!-- Hover tooltip for Gantt bars -->
+<div id="gantt-tooltip" class="card shadow-sm" style="display:none; position:fixed; z-index:1060; width:360px; pointer-events:none;">
+    <div class="card-body py-2 px-3">
+        <strong id="tooltip-title"></strong>
+        <div class="small text-muted mt-1" id="tooltip-dates"></div>
+        <div class="small mt-1" id="tooltip-progress"></div>
+        <div class="small mt-1"><strong>Assigned:</strong> <span id="tooltip-assignees"></span></div>
+    </div>
+</div>
+
 <!-- Inline edit popup for Gantt bars -->
 <div id="gantt-popup" class="card shadow" style="display:none; position:fixed; z-index:1050; width:300px;">
     <div class="card-header d-flex justify-content-between align-items-center py-2">
@@ -150,6 +160,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var popup = document.getElementById('gantt-popup');
+    var tooltip = document.getElementById('gantt-tooltip');
     var currentTaskId = null;
 
     function hidePopup() {
@@ -199,16 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var gantt = new Gantt("#gantt", tasks, {
                 view_mode: 'Week',
                 date_format: 'YYYY-MM-DD',
-                custom_popup_html: function(task) {
-                    var data = taskMap[task.id] || {};
-                    var assignees = data.assignees || 'Unassigned';
-                    return `<div class="p-2">
-                        <strong>${task.name}</strong><br>
-                        <small>${task.start} to ${task.end}</small><br>
-                        <small>Progress: ${task.progress}%</small><br>
-                        <small><strong>Assigned:</strong> ${assignees}</small>
-                    </div>`;
-                },
+                custom_popup_html: null,
                 on_date_change: function(task, start, end) {
                     var numericId = task.id.replace('task-', '');
                     var startStr = start.toISOString().slice(0, 10);
@@ -246,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
             function showPopup(taskId, e) {
                 var data = taskMap[taskId];
                 if (!data) return;
+                tooltip.style.display = 'none';
                 currentTaskId = taskId;
                 var numericId = taskId.replace('task-', '');
 
@@ -275,6 +278,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 bar.addEventListener('click', function(e) {
                     var taskId = bar.getAttribute('data-id');
                     if (taskId) showPopup(taskId, e);
+                });
+
+                bar.addEventListener('mouseenter', function(e) {
+                    var taskId = bar.getAttribute('data-id');
+                    var data = taskMap[taskId];
+                    if (!data) return;
+                    // Don't show tooltip if edit popup is open for this task
+                    if (popup.style.display !== 'none') return;
+
+                    document.getElementById('tooltip-title').textContent = data.name;
+                    document.getElementById('tooltip-dates').textContent = data.start + ' to ' + data.end;
+                    document.getElementById('tooltip-progress').textContent = 'Progress: ' + data.progress + '%';
+                    document.getElementById('tooltip-assignees').textContent = data.assignees;
+
+                    var rect = bar.getBoundingClientRect();
+                    tooltip.style.top = (rect.bottom + 8) + 'px';
+                    tooltip.style.left = Math.min(rect.left, window.innerWidth - 380) + 'px';
+                    tooltip.style.display = 'block';
+                });
+
+                bar.addEventListener('mouseleave', function() {
+                    tooltip.style.display = 'none';
                 });
             });
         });
