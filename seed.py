@@ -6,9 +6,10 @@ from datetime import date, datetime, timedelta
 app = create_app()
 
 with app.app_context():
-    # Clear existing data
+    # Clear existing data (WARNING: drops all tables and recreates from scratch)
     db.drop_all()
     db.create_all()
+    # Note: After seeding, run 'flask db stamp head' to mark migrations as current
 
     # --- Teams ---
     engineering = Team(name='Engineering')

@@ -1,8 +1,11 @@
 import os
 from flask import Flask, render_template
+from flask_migrate import Migrate
 from models import db, Project, Task, Person, Team
 from routes import register_blueprints
 from datetime import date
+
+migrate = Migrate()
 
 
 def create_app():
@@ -11,9 +14,7 @@ def create_app():
     app.config['SECRET_KEY'] = 'dev-secret-key'
 
     db.init_app(app)
-
-    with app.app_context():
-        db.create_all()
+    migrate.init_app(app, db)
 
     register_blueprints(app)
 
