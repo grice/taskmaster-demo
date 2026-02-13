@@ -28,8 +28,14 @@
 <div class="col-lg-8">
     {% if project.tasks %}
     <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Gantt Chart</h5>
+            <div class="btn-group btn-group-sm" id="gantt-zoom">
+                <button type="button" class="btn btn-outline-secondary" data-mode="Day">Day</button>
+                <button type="button" class="btn btn-outline-secondary active" data-mode="Week">Week</button>
+                <button type="button" class="btn btn-outline-secondary" data-mode="Month">Month</button>
+                <button type="button" class="btn btn-outline-secondary" data-mode="Year">Year</button>
+            </div>
         </div>
         <div class="card-body gantt-container">
             <svg id="gantt"></svg>
@@ -274,32 +280,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 popup.style.display = 'block';
             }
 
-            document.querySelectorAll('.bar-wrapper').forEach(function(bar) {
-                bar.addEventListener('click', function(e) {
-                    var taskId = bar.getAttribute('data-id');
-                    if (taskId) showPopup(taskId, e);
+            function bindBars() {
+                document.querySelectorAll('.bar-wrapper').forEach(function(bar) {
+                    bar.addEventListener('click', function(e) {
+                        var taskId = bar.getAttribute('data-id');
+                        if (taskId) showPopup(taskId, e);
+                    });
+
+                    bar.addEventListener('mouseenter', function(e) {
+                        var taskId = bar.getAttribute('data-id');
+                        var data = taskMap[taskId];
+                        if (!data) return;
+                        if (popup.style.display !== 'none') return;
+
+                        document.getElementById('tooltip-title').textContent = data.name;
+                        document.getElementById('tooltip-dates').textContent = data.start + ' to ' + data.end;
+                        document.getElementById('tooltip-progress').textContent = 'Progress: ' + data.progress + '%';
+                        document.getElementById('tooltip-assignees').textContent = data.assignees;
+
+                        var rect = bar.getBoundingClientRect();
+                        tooltip.style.top = (rect.bottom + 8) + 'px';
+                        tooltip.style.left = Math.min(rect.left, window.innerWidth - 380) + 'px';
+                        tooltip.style.display = 'block';
+                    });
+
+                    bar.addEventListener('mouseleave', function() {
+                        tooltip.style.display = 'none';
+                    });
                 });
+            }
 
-                bar.addEventListener('mouseenter', function(e) {
-                    var taskId = bar.getAttribute('data-id');
-                    var data = taskMap[taskId];
-                    if (!data) return;
-                    // Don't show tooltip if edit popup is open for this task
-                    if (popup.style.display !== 'none') return;
+            bindBars();
 
-                    document.getElementById('tooltip-title').textContent = data.name;
-                    document.getElementById('tooltip-dates').textContent = data.start + ' to ' + data.end;
-                    document.getElementById('tooltip-progress').textContent = 'Progress: ' + data.progress + '%';
-                    document.getElementById('tooltip-assignees').textContent = data.assignees;
-
-                    var rect = bar.getBoundingClientRect();
-                    tooltip.style.top = (rect.bottom + 8) + 'px';
-                    tooltip.style.left = Math.min(rect.left, window.innerWidth - 380) + 'px';
-                    tooltip.style.display = 'block';
-                });
-
-                bar.addEventListener('mouseleave', function() {
+            // Zoom buttons
+            document.querySelectorAll('#gantt-zoom button').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.querySelector('#gantt-zoom .active').classList.remove('active');
+                    btn.classList.add('active');
+                    hidePopup();
                     tooltip.style.display = 'none';
+                    gantt.change_view_mode(btn.getAttribute('data-mode'));
+                    setTimeout(bindBars, 100);
                 });
             });
         });

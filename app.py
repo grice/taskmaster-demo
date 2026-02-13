@@ -4,6 +4,7 @@ from markupsafe import Markup, escape
 from flask import Flask, render_template
 from flask_migrate import Migrate
 from models import db, Project, Task, Person, Team
+from flask import url_for as flask_url_for
 from routes import register_blueprints
 from datetime import date
 
@@ -25,19 +26,29 @@ def create_app():
 
     @app.template_filter('render_mentions')
     def render_mentions(content):
-        """Replace @"Name" with styled spans, and URLs with clickable links."""
-        safe = str(escape(content))
-        # Linkify URLs first (before mentions, since URLs won't contain @"...")
+        """Replace @"Name" with clickable links, and URLs with hyperlinks."""
+        # Linkify URLs first (on raw text, before escaping)
         def replace_url(m):
-            url = m.group(0)
+            url = escape(m.group(0))
             return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a>'
-        result = re.sub(r'https?://[^\s<>&]+', replace_url, safe)
-        # Then render @mentions
+        result = re.sub(r'https?://[^\s<>"]+', replace_url, content)
+        # Then render @mentions on raw text (before escaping the rest)
         def replace_mention(m):
             name = m.group(1) or m.group(2)
-            return f'<span class="mention-tag">@{escape(name)}</span>'
-        result = re.sub(r'@&quot;([^&]+)&quot;|@(\w+(?:\s\w+)?)', replace_mention, result)
-        return Markup(result)
+            safe_name = escape(name.strip())
+            person = Person.query.filter(Person.name.ilike(name.strip())).first()
+            if person:
+                url = flask_url_for('people.detail', id=person.id)
+                return f'<a href="{url}" class="mention-tag text-decoration-none">@{safe_name}</a>'
+            return f'<span class="mention-tag">@{safe_name}</span>'
+        result = re.sub(r'@"([^"]+)"|@(\w+(?:\s\w+)?)', replace_mention, result)
+        # Escape any remaining raw text that isn't already wrapped in tags
+        # Split on HTML tags, escape non-tag parts
+        parts = re.split(r'(<[^>]+>)', result)
+        for i, part in enumerate(parts):
+            if not part.startswith('<'):
+                parts[i] = str(escape(part))
+        return Markup(''.join(parts))
 
     @app.route('/')
     def index():
