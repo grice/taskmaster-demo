@@ -19,7 +19,9 @@
                             {{ project.name }}
                         </a>
                     </h5>
-                    <span class="badge badge-{{ project.status }}">{{ project.status | replace('_', ' ') | title }}</span>
+                    <span class="project-status status-{{ project.status }}">
+                        <span class="status-dot"></span>{{ project.status | replace('_', ' ') | title }}
+                    </span>
                 </div>
                 {% if project.description %}
                 <p class="card-text text-muted small">{{ project.description[:120] }}{% if project.description|length > 120 %}...{% endif %}</p>

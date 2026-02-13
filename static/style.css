@@ -4,10 +4,36 @@
 .badge-high { background-color: #fd7e14; }
 .badge-critical { background-color: #dc3545; }
 
-/* Status badges */
+/* Task status badges */
 .badge-todo { background-color: #6c757d; }
 .badge-in_progress { background-color: #0d6efd; }
 .badge-done { background-color: #198754; }
+
+/* Project status badges */
+.badge-active { background-color: #198754; }
+.badge-completed { background-color: #6c757d; }
+.badge-on_hold { background-color: #fd7e14; }
+
+/* Project status indicator (dot + text) */
+.project-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.project-status .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.project-status.status-active .status-dot { background-color: #198754; }
+.project-status.status-active { color: #198754; }
+.project-status.status-completed .status-dot { background-color: #6c757d; }
+.project-status.status-completed { color: #6c757d; }
+.project-status.status-on_hold .status-dot { background-color: #fd7e14; }
+.project-status.status-on_hold { color: #fd7e14; }
 
 /* Gantt status coloring */
 .gantt .bar.status-todo .bar-progress,

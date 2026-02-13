@@ -24,6 +24,13 @@ def create_app():
 
     register_blueprints(app)
 
+    @app.after_request
+    def add_no_cache_headers(response):
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+
     @app.template_filter('render_mentions')
     def render_mentions(content):
         """Replace @"Name" with clickable links, and URLs with hyperlinks."""
