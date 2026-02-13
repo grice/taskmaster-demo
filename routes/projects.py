@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from models import db, Project, Task
+from models import db, Project, Task, StatusUpdate
 
 bp = Blueprint('projects', __name__)
 
@@ -30,7 +30,13 @@ def new_project():
 @bp.route('/projects/<int:id>')
 def detail(id):
     project = Project.query.get_or_404(id)
-    return render_template('projects/detail.html', project=project)
+    # Collect all status updates across this project's tasks, newest first
+    task_ids = [t.id for t in project.tasks]
+    all_updates = StatusUpdate.query.filter(
+        StatusUpdate.task_id.in_(task_ids)
+    ).order_by(StatusUpdate.created_at.desc()).all() if task_ids else []
+    return render_template('projects/detail.html', project=project,
+                           all_updates=all_updates)
 
 
 @bp.route('/projects/<int:id>/edit', methods=['GET', 'POST'])
