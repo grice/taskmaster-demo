@@ -30,78 +30,106 @@
     <div class="col-md-3"><div class="card stat-card"><div class="stat-number text-success">{{ done_count }}</div><div class="stat-label">Done</div></div></div>
 </div>
 
-<!-- Timeline view -->
-{% if person_tasks %}
-<div class="card mb-4">
-    <div class="card-header"><h5 class="mb-0">Timeline</h5></div>
-    <div class="card-body">
-        {% set all_tasks = person_tasks %}
-        {% set min_date = all_tasks|map(attribute='start_date')|min %}
-        {% set max_date = all_tasks|map(attribute='end_date')|max %}
-        {% set total_days = (max_date - min_date).days if max_date != min_date else 1 %}
-        <div style="position: relative; min-height: {{ all_tasks|length * 32 }}px;">
-            {% for task in all_tasks %}
-            {% set offset_days = (task.start_date - min_date).days %}
-            {% set duration_days = (task.end_date - task.start_date).days %}
-            {% set left_pct = (offset_days / total_days * 100) %}
-            {% set width_pct = (duration_days / total_days * 100) %}
-            <div class="timeline-bar badge-{{ task.status }}"
-                 style="position: absolute; top: {{ loop.index0 * 32 }}px; left: {{ left_pct }}%; width: {{ [width_pct, 5]|max }}%;"
-                 title="{{ task.title }} ({{ task.start_date }} to {{ task.end_date }})">
-                <a href="{{ url_for('tasks.detail', id=task.id) }}" class="text-white text-decoration-none">{{ task.title }}</a>
+<div class="row g-4">
+<div class="col-lg-8">
+    <!-- Timeline view -->
+    {% if person_tasks %}
+    <div class="card mb-4">
+        <div class="card-header"><h5 class="mb-0">Timeline</h5></div>
+        <div class="card-body">
+            {% set all_tasks = person_tasks %}
+            {% set min_date = all_tasks|map(attribute='start_date')|min %}
+            {% set max_date = all_tasks|map(attribute='end_date')|max %}
+            {% set total_days = (max_date - min_date).days if max_date != min_date else 1 %}
+            <div style="position: relative; min-height: {{ all_tasks|length * 32 }}px;">
+                {% for task in all_tasks %}
+                {% set offset_days = (task.start_date - min_date).days %}
+                {% set duration_days = (task.end_date - task.start_date).days %}
+                {% set left_pct = (offset_days / total_days * 100) %}
+                {% set width_pct = (duration_days / total_days * 100) %}
+                <div class="timeline-bar badge-{{ task.status }}"
+                     style="position: absolute; top: {{ loop.index0 * 32 }}px; left: {{ left_pct }}%; width: {{ [width_pct, 5]|max }}%;"
+                     title="{{ task.title }} ({{ task.start_date }} to {{ task.end_date }})">
+                    <a href="{{ url_for('tasks.detail', id=task.id) }}" class="text-white text-decoration-none">{{ task.title }}</a>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-        <div class="d-flex justify-content-between mt-2 small text-muted">
-            <span>{{ min_date }}</span>
-            <span>{{ max_date }}</span>
+            <div class="d-flex justify-content-between mt-2 small text-muted">
+                <span>{{ min_date }}</span>
+                <span>{{ max_date }}</span>
+            </div>
         </div>
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-<!-- Tasks grouped by project -->
-{% if tasks_by_project %}
-{% for proj_id, group in tasks_by_project.items() %}
-<div class="card mb-3">
-    <div class="card-header">
-        <h5 class="mb-0">
-            <a href="{{ url_for('projects.detail', id=group.project.id) }}" class="text-decoration-none">
-                {{ group.project.name }}
-            </a>
-        </h5>
+    <!-- Tasks grouped by project -->
+    {% if tasks_by_project %}
+    {% for proj_id, group in tasks_by_project.items() %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <a href="{{ url_for('projects.detail', id=group.project.id) }}" class="text-decoration-none">
+                    {{ group.project.name }}
+                </a>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr><th>Task</th><th>Role</th><th>Status</th><th>Priority</th><th>Dates</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for task in group.tasks %}
+                        <tr>
+                            <td><a href="{{ url_for('tasks.detail', id=task.id) }}">{{ task.title }}</a></td>
+                            <td>
+                                {% if task.lead and task.lead.id == person.id %}
+                                <span class="badge bg-info text-dark">Lead</span>
+                                {% else %}
+                                <span class="badge bg-light text-dark">Member</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge badge-{{ task.status }}">{{ task.status | replace('_', ' ') | title }}</span></td>
+                            <td><span class="badge badge-{{ task.priority }}">{{ task.priority | title }}</span></td>
+                            <td class="small">{{ task.start_date }} &mdash; {{ task.end_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover table-sm">
-                <thead>
-                    <tr><th>Task</th><th>Role</th><th>Status</th><th>Priority</th><th>Dates</th></tr>
-                </thead>
-                <tbody>
-                    {% for task in group.tasks %}
-                    <tr>
-                        <td><a href="{{ url_for('tasks.detail', id=task.id) }}">{{ task.title }}</a></td>
-                        <td>
-                            {% if task.lead and task.lead.id == person.id %}
-                            <span class="badge bg-info text-dark">Lead</span>
-                            {% else %}
-                            <span class="badge bg-light text-dark">Member</span>
-                            {% endif %}
-                        </td>
-                        <td><span class="badge badge-{{ task.status }}">{{ task.status | replace('_', ' ') | title }}</span></td>
-                        <td><span class="badge badge-{{ task.priority }}">{{ task.priority | title }}</span></td>
-                        <td class="small">{{ task.start_date }} &mdash; {{ task.end_date }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    {% endfor %}
+    {% else %}
+    <div class="text-center py-5">
+        <p class="text-muted">No tasks assigned to this person yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="col-lg-4">
+    <div class="card" style="position: sticky; top: 1rem;">
+        <div class="card-header"><h5 class="mb-0">Mentions</h5></div>
+        <div class="card-body" style="max-height: 80vh; overflow-y: auto;">
+            {% if mentioned_updates %}
+            <div class="status-timeline">
+                {% for update in mentioned_updates %}
+                <div class="update-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <a href="{{ url_for('tasks.detail', id=update.task.id) }}" class="fw-semibold small text-decoration-none">{{ update.task.title }}</a>
+                        <span class="badge bg-secondary" style="font-size:0.65em">{{ update.task.project.name }}</span>
+                    </div>
+                    <div class="text-muted small">{{ update.created_at.strftime('%b %d, %Y at %I:%M %p') }}</div>
+                    <div class="small">{{ update.content|render_mentions }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted mb-0 small">No mentions yet. Use @"{{ person.name }}" in status updates to tag this person.</p>
+            {% endif %}
         </div>
     </div>
 </div>
-{% endfor %}
-{% else %}
-<div class="text-center py-5">
-    <p class="text-muted">No tasks assigned to this person yet.</p>
 </div>
-{% endif %}
 {% endblock %}

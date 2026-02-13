@@ -1,4 +1,6 @@
 import os
+import re
+from markupsafe import Markup, escape
 from flask import Flask, render_template
 from flask_migrate import Migrate
 from models import db, Project, Task, Person, Team
@@ -20,6 +22,22 @@ def create_app():
         db.create_all()
 
     register_blueprints(app)
+
+    @app.template_filter('render_mentions')
+    def render_mentions(content):
+        """Replace @"Name" with styled spans, and URLs with clickable links."""
+        safe = str(escape(content))
+        # Linkify URLs first (before mentions, since URLs won't contain @"...")
+        def replace_url(m):
+            url = m.group(0)
+            return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a>'
+        result = re.sub(r'https?://[^\s<>&]+', replace_url, safe)
+        # Then render @mentions
+        def replace_mention(m):
+            name = m.group(1) or m.group(2)
+            return f'<span class="mention-tag">@{escape(name)}</span>'
+        result = re.sub(r'@&quot;([^&]+)&quot;|@(\w+(?:\s\w+)?)', replace_mention, result)
+        return Markup(result)
 
     @app.route('/')
     def index():

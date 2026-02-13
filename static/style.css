@@ -111,6 +111,41 @@
     margin: 1rem 0;
 }
 
+/* @mention tags */
+.mention-tag {
+    background-color: #e7f1ff;
+    color: #0d6efd;
+    padding: 0 4px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+/* @mention autocomplete dropdown */
+.mention-dropdown {
+    position: absolute;
+    z-index: 1070;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+.mention-dropdown .mention-item {
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+.mention-dropdown .mention-item:hover,
+.mention-dropdown .mention-item.active {
+    background-color: #e7f1ff;
+}
+.mention-dropdown .mention-item .mention-hint {
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
 /* Hide Frappe Gantt's built-in popup */
 .gantt .popup-wrapper,
 .gantt-container .popup-wrapper,

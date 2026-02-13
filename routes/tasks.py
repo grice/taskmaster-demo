@@ -1,3 +1,4 @@
+import re
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from models import db, Task, TaskAssignment, Project, Person, Tag, StatusUpdate, TaskDependency
 from datetime import date
@@ -123,6 +124,16 @@ def add_status_update(id):
     if content:
         update = StatusUpdate(task_id=task.id, content=content)
         db.session.add(update)
+        db.session.flush()
+
+        # Parse @mentions — match @"First Last" or @FirstLast
+        mention_names = re.findall(r'@"([^"]+)"|@(\w+(?:\s\w+)?)', content)
+        for groups in mention_names:
+            name = groups[0] or groups[1]
+            person = Person.query.filter(Person.name.ilike(name.strip())).first()
+            if person and person not in update.mentions:
+                update.mentions.append(person)
+
         db.session.commit()
     return redirect(url_for('tasks.detail', id=task.id))
 

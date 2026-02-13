@@ -100,7 +100,7 @@
                         <span class="badge badge-{{ update.task.status }}" style="font-size:0.65em">{{ update.task.status | replace('_', ' ') | title }}</span>
                     </div>
                     <div class="text-muted small">{{ update.created_at.strftime('%b %d, %Y at %I:%M %p') }}</div>
-                    <div class="small">{{ update.content }}</div>
+                    <div class="small">{{ update.content|render_mentions }}</div>
                 </div>
                 {% endfor %}
             </div>

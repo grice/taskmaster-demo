@@ -3,6 +3,12 @@ from datetime import datetime, date
 
 db = SQLAlchemy()
 
+status_update_mentions = db.Table(
+    'status_update_mentions',
+    db.Column('status_update_id', db.Integer, db.ForeignKey('status_update.id'), primary_key=True),
+    db.Column('person_id', db.Integer, db.ForeignKey('person.id'), primary_key=True),
+)
+
 task_tags = db.Table(
     'task_tags',
     db.Column('task_id', db.Integer, db.ForeignKey('task.id'), primary_key=True),
@@ -105,3 +111,5 @@ class StatusUpdate(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    mentions = db.relationship('Person', secondary=status_update_mentions,
+                               backref=db.backref('mentioned_in', lazy=True))

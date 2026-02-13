@@ -35,10 +35,13 @@
             <div class="card-header"><h5 class="mb-0">Status Updates</h5></div>
             <div class="card-body">
                 <form method="post" action="{{ url_for('tasks.add_status_update', id=task.id) }}" class="mb-4">
-                    <div class="input-group">
-                        <textarea class="form-control" name="content" rows="2"
-                                  placeholder="Add a status update..."></textarea>
-                        <button type="submit" class="btn btn-primary">Post</button>
+                    <div class="mb-1">
+                        <textarea class="form-control mention-input" name="content" rows="2"
+                                  placeholder='Add a status update... Type @ to mention people'></textarea>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Type @ to mention people</small>
+                        <button type="submit" class="btn btn-primary btn-sm">Post</button>
                     </div>
                 </form>
 
@@ -47,7 +50,7 @@
                     {% for update in task.status_updates %}
                     <div class="update-item">
                         <div class="text-muted small">{{ update.created_at.strftime('%b %d, %Y at %I:%M %p') }}</div>
-                        <div>{{ update.content }}</div>
+                        <div>{{ update.content|render_mentions }}</div>
                     </div>
                     {% endfor %}
                 </div>

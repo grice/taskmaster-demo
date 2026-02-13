@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from models import db, Person, Team
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from models import db, Person, Team, StatusUpdate
 
 bp = Blueprint('people', __name__)
 
@@ -37,9 +37,15 @@ def detail(id):
         if proj.id not in tasks_by_project:
             tasks_by_project[proj.id] = {'project': proj, 'tasks': []}
         tasks_by_project[proj.id]['tasks'].append(task)
+    # Get all status updates that mention this person, newest first
+    mentioned_updates = StatusUpdate.query.filter(
+        StatusUpdate.mentions.any(id=person.id)
+    ).order_by(StatusUpdate.created_at.desc()).all()
+
     return render_template('people/detail.html', person=person,
                            person_tasks=person_tasks,
-                           tasks_by_project=tasks_by_project)
+                           tasks_by_project=tasks_by_project,
+                           mentioned_updates=mentioned_updates)
 
 
 @bp.route('/people/<int:id>/edit', methods=['GET', 'POST'])
@@ -53,6 +59,16 @@ def edit_person(id):
         return redirect(url_for('people.detail', id=person.id))
     teams = Team.query.order_by(Team.name).all()
     return render_template('people/form.html', person=person, teams=teams)
+
+
+@bp.route('/people/search.json')
+def search_json():
+    q = request.args.get('q', '').strip()
+    query = Person.query.order_by(Person.name)
+    if q:
+        query = query.filter(Person.name.ilike(f'%{q}%'))
+    people = query.limit(10).all()
+    return jsonify([{'id': p.id, 'name': p.name} for p in people])
 
 
 @bp.route('/people/<int:id>/delete', methods=['POST'])
