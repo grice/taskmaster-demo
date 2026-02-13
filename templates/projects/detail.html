@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var gantt = new Gantt("#gantt", tasks, {
                 view_mode: 'Week',
                 date_format: 'YYYY-MM-DD',
-                custom_popup_html: null,
+                custom_popup_html: function() { return ''; },
                 on_date_change: function(task, start, end) {
                     var numericId = task.id.replace('task-', '');
                     var startStr = start.toISOString().slice(0, 10);

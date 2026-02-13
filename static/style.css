@@ -111,7 +111,9 @@
     margin: 1rem 0;
 }
 
-/* Hide Frappe Gantt's built-in click popup */
-.gantt .popup-wrapper {
+/* Hide Frappe Gantt's built-in popup */
+.gantt .popup-wrapper,
+.gantt-container .popup-wrapper,
+.popup-wrapper {
     display: none !important;
 }
