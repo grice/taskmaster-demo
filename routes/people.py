@@ -28,14 +28,17 @@ def new_person():
 @bp.route('/people/<int:id>')
 def detail(id):
     person = Person.query.get_or_404(id)
+    # Get all tasks this person is assigned to
+    person_tasks = [a.task for a in person.assignments]
     # Group tasks by project
     tasks_by_project = {}
-    for task in person.tasks:
+    for task in person_tasks:
         proj = task.project
         if proj.id not in tasks_by_project:
             tasks_by_project[proj.id] = {'project': proj, 'tasks': []}
         tasks_by_project[proj.id]['tasks'].append(task)
     return render_template('people/detail.html', person=person,
+                           person_tasks=person_tasks,
                            tasks_by_project=tasks_by_project)
 
 

@@ -69,13 +69,24 @@
                     <dt>Priority</dt>
                     <dd><span class="badge badge-{{ task.priority }}">{{ task.priority | title }}</span></dd>
 
-                    <dt>Assignee</dt>
+                    <dt>Lead</dt>
                     <dd>
-                        {% if task.assignee %}
-                        <a href="{{ url_for('people.detail', id=task.assignee.id) }}">{{ task.assignee.name }}</a>
+                        {% if task.lead %}
+                        <a href="{{ url_for('people.detail', id=task.lead.id) }}">{{ task.lead.name }}</a>
                         {% else %}
-                        <span class="text-muted">Unassigned</span>
+                        <span class="text-muted">No lead</span>
                         {% endif %}
+                    </dd>
+
+                    <dt>Team</dt>
+                    <dd>
+                        {% for person in task.assignees %}
+                            {% if not task.lead or person.id != task.lead.id %}
+                            <a href="{{ url_for('people.detail', id=person.id) }}" class="d-block">{{ person.name }}</a>
+                            {% endif %}
+                        {% else %}
+                        <span class="text-muted">No members</span>
+                        {% endfor %}
                     </dd>
 
                     <dt>Dates</dt>

@@ -25,10 +25,11 @@
                 <p class="text-muted small mb-2">{{ person.email }}</p>
                 {% endif %}
 
-                {% set total = person.tasks|length %}
-                {% set todo = person.tasks|selectattr('status', 'equalto', 'todo')|list|length %}
-                {% set in_prog = person.tasks|selectattr('status', 'equalto', 'in_progress')|list|length %}
-                {% set done = person.tasks|selectattr('status', 'equalto', 'done')|list|length %}
+                {% set ptasks = person.assignments|map(attribute='task')|list %}
+                {% set total = ptasks|length %}
+                {% set todo = ptasks|selectattr('status', 'equalto', 'todo')|list|length %}
+                {% set in_prog = ptasks|selectattr('status', 'equalto', 'in_progress')|list|length %}
+                {% set done = ptasks|selectattr('status', 'equalto', 'done')|list|length %}
 
                 <div class="d-flex justify-content-between small mb-1">
                     <span>{{ total }} tasks</span>

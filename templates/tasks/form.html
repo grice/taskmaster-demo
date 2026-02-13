@@ -28,15 +28,29 @@
     </div>
 
     <div class="mb-3">
-        <label for="assignee_id" class="form-label">Assignee</label>
-        <select class="form-select" id="assignee_id" name="assignee_id">
-            <option value="">Unassigned</option>
+        <label for="lead_id" class="form-label">Lead</label>
+        <select class="form-select" id="lead_id" name="lead_id">
+            <option value="">No lead</option>
             {% for person in people %}
-            <option value="{{ person.id }}" {{ 'selected' if task and task.assignee_id == person.id else '' }}>
+            <option value="{{ person.id }}" {{ 'selected' if task and task.lead and task.lead.id == person.id else '' }}>
                 {{ person.name }}{% if person.team %} ({{ person.team.name }}){% endif %}
             </option>
             {% endfor %}
         </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Team Members</label>
+        <small class="text-muted d-block mb-1">Select additional people working on this task (lead is included automatically)</small>
+        {% for person in people %}
+        <div class="form-check">
+            <input class="form-check-input member-check" type="checkbox" name="member_ids"
+                   value="{{ person.id }}" id="member-{{ person.id }}"
+                   {{ 'checked' if task and person in task.assignees else '' }}>
+            <label class="form-check-label" for="member-{{ person.id }}">
+                {{ person.name }}{% if person.team %} ({{ person.team.name }}){% endif %}
+            </label>
+        </div>
+        {% endfor %}
     </div>
 
     <div class="row">

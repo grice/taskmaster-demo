@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from models import db, Task, Project, Person, Tag, StatusUpdate, TaskDependency
+from models import db, Task, TaskAssignment, Project, Person, Tag, StatusUpdate, TaskDependency
 from datetime import date
 
 bp = Blueprint('tasks', __name__)
@@ -12,7 +12,6 @@ def new_task():
             title=request.form['title'],
             description=request.form.get('description', ''),
             project_id=int(request.form['project_id']),
-            assignee_id=int(request.form['assignee_id']) if request.form.get('assignee_id') else None,
             start_date=date.fromisoformat(request.form['start_date']),
             end_date=date.fromisoformat(request.form['end_date']),
             status=request.form.get('status', 'todo'),
@@ -20,6 +19,15 @@ def new_task():
         )
         db.session.add(task)
         db.session.flush()  # get task.id
+
+        # Handle assignees
+        lead_id = request.form.get('lead_id')
+        member_ids = request.form.getlist('member_ids')
+        if lead_id:
+            db.session.add(TaskAssignment(task_id=task.id, person_id=int(lead_id), is_lead=True))
+        for mid in member_ids:
+            if mid and mid != lead_id:
+                db.session.add(TaskAssignment(task_id=task.id, person_id=int(mid), is_lead=False))
 
         # Handle tags
         tag_names = [t.strip() for t in request.form.get('tags', '').split(',') if t.strip()]
@@ -63,11 +71,20 @@ def edit_task(id):
     if request.method == 'POST':
         task.title = request.form['title']
         task.description = request.form.get('description', '')
-        task.assignee_id = int(request.form['assignee_id']) if request.form.get('assignee_id') else None
         task.start_date = date.fromisoformat(request.form['start_date'])
         task.end_date = date.fromisoformat(request.form['end_date'])
         task.status = request.form.get('status', 'todo')
         task.priority = request.form.get('priority', 'medium')
+
+        # Update assignees
+        TaskAssignment.query.filter_by(task_id=task.id).delete()
+        lead_id = request.form.get('lead_id')
+        member_ids = request.form.getlist('member_ids')
+        if lead_id:
+            db.session.add(TaskAssignment(task_id=task.id, person_id=int(lead_id), is_lead=True))
+        for mid in member_ids:
+            if mid and mid != lead_id:
+                db.session.add(TaskAssignment(task_id=task.id, person_id=int(mid), is_lead=False))
 
         # Update tags
         task.tags.clear()

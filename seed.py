@@ -1,6 +1,6 @@
 """Populate the database with sample data for testing."""
 from app import create_app
-from models import db, Team, Person, Project, Task, TaskDependency, Tag, StatusUpdate
+from models import db, Team, Person, Project, Task, TaskAssignment, TaskDependency, Tag, StatusUpdate
 from datetime import date, datetime, timedelta
 
 app = create_app()
@@ -51,31 +51,47 @@ with app.app_context():
     db.session.flush()
 
     t1 = Task(title='Design mockups', description='Create wireframes and high-fidelity mockups for all pages.',
-              project_id=p1.id, assignee_id=carol.id,
+              project_id=p1.id,
               start_date=today - timedelta(days=30), end_date=today - timedelta(days=15),
               status='done', priority='high')
     t2 = Task(title='Frontend implementation', description='Build React components based on approved designs.',
-              project_id=p1.id, assignee_id=alice.id,
+              project_id=p1.id,
               start_date=today - timedelta(days=14), end_date=today + timedelta(days=20),
               status='in_progress', priority='high')
     t3 = Task(title='Backend API', description='Build REST API endpoints for the new site.',
-              project_id=p1.id, assignee_id=bob.id,
+              project_id=p1.id,
               start_date=today - timedelta(days=14), end_date=today + timedelta(days=10),
               status='in_progress', priority='high')
     t4 = Task(title='Content migration', description='Migrate existing content to the new CMS structure.',
-              project_id=p1.id, assignee_id=eve.id,
+              project_id=p1.id,
               start_date=today + timedelta(days=10), end_date=today + timedelta(days=30),
               status='todo', priority='medium')
     t5 = Task(title='QA testing', description='Full regression testing of the new website.',
-              project_id=p1.id, assignee_id=frank.id,
+              project_id=p1.id,
               start_date=today + timedelta(days=25), end_date=today + timedelta(days=45),
               status='todo', priority='high')
     t6 = Task(title='Launch', description='Deploy to production and monitor.',
-              project_id=p1.id, assignee_id=alice.id,
+              project_id=p1.id,
               start_date=today + timedelta(days=50), end_date=today + timedelta(days=60),
               status='todo', priority='critical')
     db.session.add_all([t1, t2, t3, t4, t5, t6])
     db.session.flush()
+
+    # Assignments (lead + team members)
+    db.session.add_all([
+        TaskAssignment(task_id=t1.id, person_id=carol.id, is_lead=True),
+        TaskAssignment(task_id=t1.id, person_id=dave.id, is_lead=False),
+        TaskAssignment(task_id=t2.id, person_id=alice.id, is_lead=True),
+        TaskAssignment(task_id=t2.id, person_id=frank.id, is_lead=False),
+        TaskAssignment(task_id=t3.id, person_id=bob.id, is_lead=True),
+        TaskAssignment(task_id=t3.id, person_id=alice.id, is_lead=False),
+        TaskAssignment(task_id=t4.id, person_id=eve.id, is_lead=True),
+        TaskAssignment(task_id=t5.id, person_id=frank.id, is_lead=True),
+        TaskAssignment(task_id=t5.id, person_id=bob.id, is_lead=False),
+        TaskAssignment(task_id=t6.id, person_id=alice.id, is_lead=True),
+        TaskAssignment(task_id=t6.id, person_id=bob.id, is_lead=False),
+        TaskAssignment(task_id=t6.id, person_id=frank.id, is_lead=False),
+    ])
 
     # Tags
     t1.tags.extend([tag_design])
@@ -122,27 +138,39 @@ with app.app_context():
     db.session.flush()
 
     t7 = Task(title='UX research', description='User interviews and competitor analysis.',
-              project_id=p2.id, assignee_id=dave.id,
+              project_id=p2.id,
               start_date=today - timedelta(days=10), end_date=today + timedelta(days=5),
               status='in_progress', priority='medium')
     t8 = Task(title='App architecture planning', description='Plan the new offline-first architecture.',
-              project_id=p2.id, assignee_id=bob.id,
+              project_id=p2.id,
               start_date=today - timedelta(days=5), end_date=today + timedelta(days=10),
               status='in_progress', priority='high')
     t9 = Task(title='Offline sync engine', description='Build the offline data sync layer.',
-              project_id=p2.id, assignee_id=frank.id,
+              project_id=p2.id,
               start_date=today + timedelta(days=10), end_date=today + timedelta(days=50),
               status='todo', priority='critical')
     t10 = Task(title='New navigation UI', description='Implement the redesigned navigation flow.',
-               project_id=p2.id, assignee_id=alice.id,
+               project_id=p2.id,
                start_date=today + timedelta(days=15), end_date=today + timedelta(days=45),
                status='todo', priority='high')
     t11 = Task(title='Beta testing', description='Distribute beta builds and collect feedback.',
-               project_id=p2.id, assignee_id=eve.id,
+               project_id=p2.id,
                start_date=today + timedelta(days=55), end_date=today + timedelta(days=80),
                status='todo', priority='medium')
     db.session.add_all([t7, t8, t9, t10, t11])
     db.session.flush()
+
+    db.session.add_all([
+        TaskAssignment(task_id=t7.id, person_id=dave.id, is_lead=True),
+        TaskAssignment(task_id=t7.id, person_id=carol.id, is_lead=False),
+        TaskAssignment(task_id=t8.id, person_id=bob.id, is_lead=True),
+        TaskAssignment(task_id=t8.id, person_id=frank.id, is_lead=False),
+        TaskAssignment(task_id=t9.id, person_id=frank.id, is_lead=True),
+        TaskAssignment(task_id=t9.id, person_id=bob.id, is_lead=False),
+        TaskAssignment(task_id=t10.id, person_id=alice.id, is_lead=True),
+        TaskAssignment(task_id=t10.id, person_id=dave.id, is_lead=False),
+        TaskAssignment(task_id=t11.id, person_id=eve.id, is_lead=True),
+    ])
 
     t7.tags.extend([tag_design])
     t8.tags.extend([tag_backend, tag_infra])
@@ -176,19 +204,26 @@ with app.app_context():
     db.session.flush()
 
     t12 = Task(title='Campaign strategy', description='Define target audience, channels, and messaging.',
-               project_id=p3.id, assignee_id=eve.id,
+               project_id=p3.id,
                start_date=today - timedelta(days=45), end_date=today - timedelta(days=35),
                status='done', priority='high')
     t13 = Task(title='Creative assets', description='Design banners, social media graphics, and email templates.',
-               project_id=p3.id, assignee_id=carol.id,
+               project_id=p3.id,
                start_date=today - timedelta(days=34), end_date=today - timedelta(days=20),
                status='done', priority='medium')
     t14 = Task(title='Campaign execution', description='Launch ads, send emails, post on social media.',
-               project_id=p3.id, assignee_id=eve.id,
+               project_id=p3.id,
                start_date=today - timedelta(days=19), end_date=today - timedelta(days=5),
                status='done', priority='high')
     db.session.add_all([t12, t13, t14])
     db.session.flush()
+
+    db.session.add_all([
+        TaskAssignment(task_id=t12.id, person_id=eve.id, is_lead=True),
+        TaskAssignment(task_id=t13.id, person_id=carol.id, is_lead=True),
+        TaskAssignment(task_id=t13.id, person_id=dave.id, is_lead=False),
+        TaskAssignment(task_id=t14.id, person_id=eve.id, is_lead=True),
+    ])
 
     t13.tags.extend([tag_design])
     t14.tags.extend([tag_urgent])
@@ -221,23 +256,32 @@ with app.app_context():
     db.session.flush()
 
     t15 = Task(title='K8s cluster setup', description='Provision and configure Kubernetes cluster.',
-               project_id=p4.id, assignee_id=frank.id,
+               project_id=p4.id,
                start_date=today - timedelta(days=5), end_date=today + timedelta(days=10),
                status='in_progress', priority='critical')
     t16 = Task(title='CI/CD pipeline', description='Set up GitHub Actions with automated deployments.',
-               project_id=p4.id, assignee_id=bob.id,
+               project_id=p4.id,
                start_date=today + timedelta(days=5), end_date=today + timedelta(days=25),
                status='todo', priority='high')
     t17 = Task(title='Service migration', description='Migrate services one-by-one to new infrastructure.',
-               project_id=p4.id, assignee_id=alice.id,
+               project_id=p4.id,
                start_date=today + timedelta(days=20), end_date=today + timedelta(days=40),
                status='todo', priority='high')
     t18 = Task(title='Monitoring setup', description='Set up Prometheus, Grafana, and alerting.',
-               project_id=p4.id, assignee_id=frank.id,
+               project_id=p4.id,
                start_date=today + timedelta(days=10), end_date=today + timedelta(days=20),
                status='todo', priority='medium')
     db.session.add_all([t15, t16, t17, t18])
     db.session.flush()
+
+    db.session.add_all([
+        TaskAssignment(task_id=t15.id, person_id=frank.id, is_lead=True),
+        TaskAssignment(task_id=t15.id, person_id=bob.id, is_lead=False),
+        TaskAssignment(task_id=t16.id, person_id=bob.id, is_lead=True),
+        TaskAssignment(task_id=t17.id, person_id=alice.id, is_lead=True),
+        TaskAssignment(task_id=t17.id, person_id=frank.id, is_lead=False),
+        TaskAssignment(task_id=t18.id, person_id=frank.id, is_lead=True),
+    ])
 
     t15.tags.extend([tag_infra, tag_urgent])
     t16.tags.extend([tag_infra])

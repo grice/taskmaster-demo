@@ -42,7 +42,7 @@
                 <thead>
                     <tr>
                         <th>Title</th>
-                        <th>Assignee</th>
+                        <th>Assigned</th>
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Dates</th>
@@ -54,8 +54,10 @@
                     <tr>
                         <td><a href="{{ url_for('tasks.detail', id=task.id) }}">{{ task.title }}</a></td>
                         <td>
-                            {% if task.assignee %}
-                            <a href="{{ url_for('people.detail', id=task.assignee.id) }}">{{ task.assignee.name }}</a>
+                            {% if task.assignees %}
+                                {% for person in task.assignees %}
+                                <a href="{{ url_for('people.detail', id=person.id) }}">{{ person.name }}</a>{% if task.lead and person.id == task.lead.id %} <span class="badge bg-info text-dark" style="font-size:0.65em">lead</span>{% endif %}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
                             {% else %}
                             <span class="text-muted">Unassigned</span>
                             {% endif %}

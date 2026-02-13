@@ -21,7 +21,7 @@ class Person(db.Model):
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120))
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
-    tasks = db.relationship('Task', backref='assignee', lazy=True)
+    assignments = db.relationship('TaskAssignment', backref='person', lazy=True)
 
 
 class Project(db.Model):
@@ -39,12 +39,13 @@ class Task(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
-    assignee_id = db.Column(db.Integer, db.ForeignKey('person.id'))
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(20), default='todo')  # todo, in_progress, done
     priority = db.Column(db.String(20), default='medium')  # low, medium, high, critical
 
+    assignments = db.relationship('TaskAssignment', backref='task', lazy=True,
+                                   cascade='all, delete-orphan')
     tags = db.relationship('Tag', secondary=task_tags, backref=db.backref('tasks', lazy=True))
     status_updates = db.relationship('StatusUpdate', backref='task', lazy=True,
                                      order_by='StatusUpdate.created_at.desc()',
@@ -60,6 +61,17 @@ class Task(db.Model):
     )
 
     @property
+    def lead(self):
+        for a in self.assignments:
+            if a.is_lead:
+                return a.person
+        return None
+
+    @property
+    def assignees(self):
+        return [a.person for a in self.assignments]
+
+    @property
     def progress(self):
         if self.status == 'done':
             return 100
@@ -73,6 +85,14 @@ class TaskDependency(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     depends_on_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+
+
+class TaskAssignment(db.Model):
+    __tablename__ = 'task_assignment'
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+    person_id = db.Column(db.Integer, db.ForeignKey('person.id'), nullable=False)
+    is_lead = db.Column(db.Boolean, default=False)
 
 
 class Tag(db.Model):

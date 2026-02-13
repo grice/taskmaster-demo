@@ -18,10 +18,10 @@
 </div>
 
 <!-- Summary stats -->
-{% set total = person.tasks|length %}
-{% set todo = person.tasks|selectattr('status', 'equalto', 'todo')|list|length %}
-{% set in_prog = person.tasks|selectattr('status', 'equalto', 'in_progress')|list|length %}
-{% set done_count = person.tasks|selectattr('status', 'equalto', 'done')|list|length %}
+{% set total = person_tasks|length %}
+{% set todo = person_tasks|selectattr('status', 'equalto', 'todo')|list|length %}
+{% set in_prog = person_tasks|selectattr('status', 'equalto', 'in_progress')|list|length %}
+{% set done_count = person_tasks|selectattr('status', 'equalto', 'done')|list|length %}
 
 <div class="row g-3 mb-4">
     <div class="col-md-3"><div class="card stat-card"><div class="stat-number">{{ total }}</div><div class="stat-label">Total Tasks</div></div></div>
@@ -31,11 +31,11 @@
 </div>
 
 <!-- Timeline view -->
-{% if person.tasks %}
+{% if person_tasks %}
 <div class="card mb-4">
     <div class="card-header"><h5 class="mb-0">Timeline</h5></div>
     <div class="card-body">
-        {% set all_tasks = person.tasks %}
+        {% set all_tasks = person_tasks %}
         {% set min_date = all_tasks|map(attribute='start_date')|min %}
         {% set max_date = all_tasks|map(attribute='end_date')|max %}
         {% set total_days = (max_date - min_date).days if max_date != min_date else 1 %}
@@ -75,12 +75,19 @@
         <div class="table-responsive">
             <table class="table table-hover table-sm">
                 <thead>
-                    <tr><th>Task</th><th>Status</th><th>Priority</th><th>Dates</th></tr>
+                    <tr><th>Task</th><th>Role</th><th>Status</th><th>Priority</th><th>Dates</th></tr>
                 </thead>
                 <tbody>
                     {% for task in group.tasks %}
                     <tr>
                         <td><a href="{{ url_for('tasks.detail', id=task.id) }}">{{ task.title }}</a></td>
+                        <td>
+                            {% if task.lead and task.lead.id == person.id %}
+                            <span class="badge bg-info text-dark">Lead</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark">Member</span>
+                            {% endif %}
+                        </td>
                         <td><span class="badge badge-{{ task.status }}">{{ task.status | replace('_', ' ') | title }}</span></td>
                         <td><span class="badge badge-{{ task.priority }}">{{ task.priority | title }}</span></td>
                         <td class="small">{{ task.start_date }} &mdash; {{ task.end_date }}</td>
