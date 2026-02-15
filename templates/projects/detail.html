@@ -42,6 +42,38 @@
         </div>
     </div>
 
+    {% if upcoming_milestones %}
+    <div class="card mb-4">
+        <div class="card-header"><h5 class="mb-0">Upcoming Milestones</h5></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Milestone</th>
+                            <th>Task</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ms in upcoming_milestones %}
+                        <tr>
+                            <td class="milestone-diamond">&#9670;</td>
+                            <td>{{ ms.name }}</td>
+                            <td><a href="{{ url_for('tasks.detail', id=ms.task.id) }}">{{ ms.task.title }}</a></td>
+                            <td class="small">{{ ms.date }}</td>
+                            <td><span class="badge milestone-{{ ms.computed_status }}">{{ ms.computed_status | replace('_', ' ') | title }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="card">
         <div class="card-header"><h5 class="mb-0">Tasks</h5></div>
         <div class="card-body">
@@ -127,7 +159,7 @@
         <strong id="tooltip-title"></strong>
         <div class="small text-muted mt-1" id="tooltip-dates"></div>
         <div class="small mt-1" id="tooltip-progress"></div>
-        <div class="small mt-1"><strong>Assigned:</strong> <span id="tooltip-assignees"></span></div>
+        <div class="small mt-1"><strong id="tooltip-extra-label">Assigned:</strong> <span id="tooltip-assignees"></span></div>
     </div>
 </div>
 
@@ -283,6 +315,8 @@ document.addEventListener('DOMContentLoaded', function() {
             function bindBars() {
                 document.querySelectorAll('.bar-wrapper').forEach(function(bar) {
                     bar.addEventListener('click', function(e) {
+                        // Ignore clicks on milestone diamonds
+                        if (e.target.closest('.gantt-milestone')) return;
                         var taskId = bar.getAttribute('data-id');
                         if (taskId) showPopup(taskId, e);
                     });
@@ -296,6 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('tooltip-title').textContent = data.name;
                         document.getElementById('tooltip-dates').textContent = data.start + ' to ' + data.end;
                         document.getElementById('tooltip-progress').textContent = 'Progress: ' + data.progress + '%';
+                        document.getElementById('tooltip-extra-label').textContent = 'Assigned:';
                         document.getElementById('tooltip-assignees').textContent = data.assignees;
 
                         var rect = bar.getBoundingClientRect();
@@ -308,9 +343,81 @@ document.addEventListener('DOMContentLoaded', function() {
                         tooltip.style.display = 'none';
                     });
                 });
+
+            }
+
+            function renderMilestones() {
+                // Remove any existing milestone overlay group
+                var existing = document.querySelector('.milestone-overlay');
+                if (existing) existing.remove();
+
+                var svg = document.querySelector('#gantt');
+                if (!svg) return;
+
+                // Create a separate group on top of everything (outside bar-wrappers)
+                var overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                overlay.setAttribute('class', 'milestone-overlay');
+                svg.appendChild(overlay);
+
+                document.querySelectorAll('.bar-wrapper').forEach(function(bar) {
+                    var taskId = bar.getAttribute('data-id');
+                    var data = taskMap[taskId];
+                    if (!data || !data.milestones || data.milestones.length === 0) return;
+                    var rect = bar.querySelector('.bar');
+                    if (!rect) return;
+                    var barX = parseFloat(rect.getAttribute('x'));
+                    var barW = parseFloat(rect.getAttribute('width'));
+                    var barY = parseFloat(rect.getAttribute('y'));
+                    var barH = parseFloat(rect.getAttribute('height'));
+                    var startMs = new Date(data.start).getTime();
+                    var endMs = new Date(data.end).getTime();
+                    var range = endMs - startMs;
+                    if (range <= 0) return;
+                    data.milestones.forEach(function(ms) {
+                        var msMs = new Date(ms.date).getTime();
+                        var frac = (msMs - startMs) / range;
+                        var cx = barX + frac * barW;
+                        var cy = barY - 2;
+                        var size = 7;
+                        var color = ms.status === 'delayed' ? '#dc3545' : ms.status === 'on_hold' ? '#fd7e14' : '#198754';
+                        var diamond = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        var points = [
+                            (cx) + ',' + (cy - size),
+                            (cx + size) + ',' + (cy),
+                            (cx) + ',' + (cy + size),
+                            (cx - size) + ',' + (cy)
+                        ].join(' ');
+                        diamond.setAttribute('points', points);
+                        diamond.setAttribute('fill', color);
+                        diamond.setAttribute('stroke', '#fff');
+                        diamond.setAttribute('stroke-width', '1.5');
+                        diamond.setAttribute('class', 'gantt-milestone');
+                        diamond.style.cursor = 'default';
+
+                        // Milestone hover: show milestone info instead of task info
+                        diamond.addEventListener('mouseenter', function(e) {
+                            if (popup.style.display !== 'none') return;
+                            document.getElementById('tooltip-title').textContent = ms.name;
+                            document.getElementById('tooltip-dates').textContent = 'Date: ' + ms.date;
+                            document.getElementById('tooltip-progress').textContent = 'Status: ' + ms.status.replace('_', ' ');
+                            document.getElementById('tooltip-extra-label').textContent = 'Task:';
+                            document.getElementById('tooltip-assignees').textContent = data.name;
+                            var bRect = diamond.getBoundingClientRect();
+                            tooltip.style.top = (bRect.bottom + 8) + 'px';
+                            tooltip.style.left = Math.min(bRect.left - 160, window.innerWidth - 380) + 'px';
+                            tooltip.style.display = 'block';
+                        });
+                        diamond.addEventListener('mouseleave', function() {
+                            tooltip.style.display = 'none';
+                        });
+
+                        overlay.appendChild(diamond);
+                    });
+                });
             }
 
             bindBars();
+            renderMilestones();
 
             // Zoom buttons
             document.querySelectorAll('#gantt-zoom button').forEach(function(btn) {
@@ -320,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     hidePopup();
                     tooltip.style.display = 'none';
                     gantt.change_view_mode(btn.getAttribute('data-mode'));
-                    setTimeout(bindBars, 100);
+                    setTimeout(function() { bindBars(); renderMilestones(); }, 100);
                 });
             });
         });

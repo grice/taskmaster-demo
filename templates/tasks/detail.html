@@ -30,6 +30,57 @@
         </div>
         {% endif %}
 
+        <!-- Milestones -->
+        <div class="card mb-3">
+            <div class="card-header"><h5 class="mb-0">Milestones</h5></div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('tasks.add_milestone', id=task.id) }}" class="mb-3">
+                    <div class="row g-2 align-items-end">
+                        <div class="col">
+                            <input type="text" class="form-control form-control-sm" name="name" placeholder="Milestone name" required>
+                        </div>
+                        <div class="col-auto">
+                            <input type="date" class="form-control form-control-sm" name="date" required>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if task.milestones %}
+                <div class="list-group list-group-flush">
+                    {% for ms in task.milestones %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                            <span class="milestone-diamond me-1">&#9670;</span>
+                            <strong>{{ ms.name }}</strong>
+                            <span class="text-muted small ms-2">{{ ms.date }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge milestone-{{ ms.computed_status }}">{{ ms.computed_status | replace('_', ' ') | title }}</span>
+                            <form method="post" action="{{ url_for('tasks.update_milestone_status', id=ms.id) }}" class="d-inline">
+                                <select name="status_override" class="form-select form-select-sm" style="width:auto; font-size:0.75rem;" onchange="this.form.submit()">
+                                    <option value="" {{ 'selected' if not ms.status_override else '' }}>Auto</option>
+                                    <option value="on_track" {{ 'selected' if ms.status_override == 'on_track' else '' }}>On Track</option>
+                                    <option value="delayed" {{ 'selected' if ms.status_override == 'delayed' else '' }}>Delayed</option>
+                                    <option value="on_hold" {{ 'selected' if ms.status_override == 'on_hold' else '' }}>On Hold</option>
+                                </select>
+                            </form>
+                            <form method="post" action="{{ url_for('tasks.delete_milestone', id=ms.id) }}" class="d-inline"
+                                  onsubmit="return confirm('Delete this milestone?')">
+                                <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-1" style="font-size:0.7rem;">&times;</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0 small">No milestones yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
         <!-- Status Updates -->
         <div class="card">
             <div class="card-header"><h5 class="mb-0">Status Updates</h5></div>

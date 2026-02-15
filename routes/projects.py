@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from models import db, Project, Task, StatusUpdate
+from models import db, Project, Task, StatusUpdate, Milestone
+from datetime import date
 
 bp = Blueprint('projects', __name__)
 
@@ -35,8 +36,13 @@ def detail(id):
     all_updates = StatusUpdate.query.filter(
         StatusUpdate.task_id.in_(task_ids)
     ).order_by(StatusUpdate.created_at.desc()).all() if task_ids else []
+    upcoming_milestones = Milestone.query.filter(
+        Milestone.task_id.in_(task_ids),
+        Milestone.date >= date.today()
+    ).order_by(Milestone.date).all() if task_ids else []
     return render_template('projects/detail.html', project=project,
-                           all_updates=all_updates)
+                           all_updates=all_updates,
+                           upcoming_milestones=upcoming_milestones)
 
 
 @bp.route('/projects/<int:id>/edit', methods=['GET', 'POST'])
@@ -75,6 +81,8 @@ def gantt_data(id):
             if a.is_lead:
                 name += ' (lead)'
             assignee_names.append(name)
+        milestones = [{'name': ms.name, 'date': ms.date.isoformat(),
+                       'status': ms.computed_status} for ms in task.milestones]
         tasks.append({
             'id': f'task-{task.id}',
             'name': task.title,
@@ -84,5 +92,6 @@ def gantt_data(id):
             'dependencies': dep_ids,
             'custom_class': f'status-{task.status} priority-{task.priority}',
             'assignees': ', '.join(assignee_names) if assignee_names else 'Unassigned',
+            'milestones': milestones,
         })
     return jsonify(tasks)

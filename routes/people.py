@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from models import db, Person, Team, StatusUpdate
+from models import db, Person, Team, StatusUpdate, Milestone, TaskAssignment
+from datetime import date
 
 bp = Blueprint('people', __name__)
 
@@ -42,10 +43,18 @@ def detail(id):
         StatusUpdate.mentions.any(id=person.id)
     ).order_by(StatusUpdate.created_at.desc()).all()
 
+    # Get upcoming milestones for tasks this person is assigned to
+    task_ids = [t.id for t in person_tasks]
+    upcoming_milestones = Milestone.query.filter(
+        Milestone.task_id.in_(task_ids),
+        Milestone.date >= date.today()
+    ).order_by(Milestone.date).all() if task_ids else []
+
     return render_template('people/detail.html', person=person,
                            person_tasks=person_tasks,
                            tasks_by_project=tasks_by_project,
-                           mentioned_updates=mentioned_updates)
+                           mentioned_updates=mentioned_updates,
+                           upcoming_milestones=upcoming_milestones)
 
 
 @bp.route('/people/<int:id>/edit', methods=['GET', 'POST'])

@@ -109,6 +109,32 @@
 </div>
 
 <div class="col-lg-4">
+    {% if upcoming_milestones %}
+    <div class="card mb-3">
+        <div class="card-header"><h5 class="mb-0">Upcoming Milestones</h5></div>
+        <div class="card-body">
+            <div class="list-group list-group-flush">
+                {% for ms in upcoming_milestones %}
+                <div class="list-group-item px-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="milestone-diamond me-1">&#9670;</span>
+                            <strong class="small">{{ ms.name }}</strong>
+                        </div>
+                        <span class="badge milestone-{{ ms.computed_status }}" style="font-size:0.7em">{{ ms.computed_status | replace('_', ' ') | title }}</span>
+                    </div>
+                    <div class="small text-muted">
+                        {{ ms.date }} &middot;
+                        <a href="{{ url_for('tasks.detail', id=ms.task.id) }}" class="text-decoration-none">{{ ms.task.title }}</a>
+                        &middot; {{ ms.task.project.name }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="card" style="position: sticky; top: 1rem;">
         <div class="card-header"><h5 class="mb-0">Mentions</h5></div>
         <div class="card-body" style="max-height: 80vh; overflow-y: auto;">

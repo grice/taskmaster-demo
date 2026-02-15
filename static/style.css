@@ -1,3 +1,14 @@
+/* Milestone status badges */
+.milestone-on_track { background-color: #198754; color: white; }
+.milestone-delayed { background-color: #dc3545; color: white; }
+.milestone-on_hold { background-color: #fd7e14; color: white; }
+
+/* Milestone diamond icon */
+.milestone-diamond {
+    color: #198754;
+    font-size: 0.9rem;
+}
+
 /* Priority badges */
 .badge-low { background-color: #6c757d; }
 .badge-medium { background-color: #0d6efd; }
@@ -293,4 +304,9 @@
 [data-bs-theme="dark"] .gantt .bar.priority-high .bar-wrapper .bar {
     stroke: #ffb347;
     stroke-width: 2;
+}
+
+/* Gantt dark mode — milestone diamond stroke */
+[data-bs-theme="dark"] .gantt-milestone {
+    stroke: #212529;
 }

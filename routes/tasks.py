@@ -1,6 +1,6 @@
 import re
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from models import db, Task, TaskAssignment, Project, Person, Tag, StatusUpdate, TaskDependency
+from models import db, Task, TaskAssignment, Project, Person, Tag, StatusUpdate, TaskDependency, Milestone
 from datetime import date
 
 bp = Blueprint('tasks', __name__)
@@ -44,6 +44,14 @@ def new_task():
         for dep_id in dep_ids:
             dep = TaskDependency(task_id=task.id, depends_on_id=int(dep_id))
             db.session.add(dep)
+
+        # Handle milestones
+        ms_names = request.form.getlist('milestone_names')
+        ms_dates = request.form.getlist('milestone_dates')
+        for name, ms_date in zip(ms_names, ms_dates):
+            if name.strip() and ms_date:
+                db.session.add(Milestone(task_id=task.id, name=name.strip(),
+                                         date=date.fromisoformat(ms_date)))
 
         db.session.commit()
         return redirect(url_for('projects.detail', id=task.project_id))
@@ -104,6 +112,15 @@ def edit_task(id):
             dep = TaskDependency(task_id=task.id, depends_on_id=int(dep_id))
             db.session.add(dep)
 
+        # Update milestones
+        Milestone.query.filter_by(task_id=task.id).delete()
+        ms_names = request.form.getlist('milestone_names')
+        ms_dates = request.form.getlist('milestone_dates')
+        for name, ms_date in zip(ms_names, ms_dates):
+            if name.strip() and ms_date:
+                db.session.add(Milestone(task_id=task.id, name=name.strip(),
+                                         date=date.fromisoformat(ms_date)))
+
         db.session.commit()
         return redirect(url_for('tasks.detail', id=task.id))
 
@@ -151,6 +168,37 @@ def quick_update(id):
         task.status = data['status']
     db.session.commit()
     return jsonify({'ok': True, 'progress': task.progress})
+
+
+@bp.route('/tasks/<int:id>/milestones', methods=['POST'])
+def add_milestone(id):
+    task = Task.query.get_or_404(id)
+    name = request.form.get('name', '').strip()
+    ms_date = request.form.get('date', '')
+    if name and ms_date:
+        milestone = Milestone(task_id=task.id, name=name,
+                              date=date.fromisoformat(ms_date))
+        db.session.add(milestone)
+        db.session.commit()
+    return redirect(url_for('tasks.detail', id=task.id))
+
+
+@bp.route('/milestones/<int:id>/status', methods=['POST'])
+def update_milestone_status(id):
+    milestone = Milestone.query.get_or_404(id)
+    status = request.form.get('status_override', '')
+    milestone.status_override = status if status else None
+    db.session.commit()
+    return redirect(url_for('tasks.detail', id=milestone.task_id))
+
+
+@bp.route('/milestones/<int:id>/delete', methods=['POST'])
+def delete_milestone(id):
+    milestone = Milestone.query.get_or_404(id)
+    task_id = milestone.task_id
+    db.session.delete(milestone)
+    db.session.commit()
+    return redirect(url_for('tasks.detail', id=task_id))
 
 
 @bp.route('/tasks/<int:id>/delete', methods=['POST'])

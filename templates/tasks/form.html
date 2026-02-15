@@ -96,6 +96,28 @@
                placeholder="e.g. frontend, urgent, v2">
     </div>
 
+    <div class="mb-3">
+        <label class="form-label">Milestones</label>
+        <div id="milestones-list">
+            {% if task and task.milestones %}
+            {% for ms in task.milestones %}
+            <div class="row g-2 mb-2 milestone-row">
+                <div class="col">
+                    <input type="text" class="form-control form-control-sm" name="milestone_names" value="{{ ms.name }}" placeholder="Name" required>
+                </div>
+                <div class="col-auto">
+                    <input type="date" class="form-control form-control-sm" name="milestone_dates" value="{{ ms.date }}" required>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.milestone-row').remove()">&times;</button>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addMilestoneRow()">+ Add Milestone</button>
+    </div>
+
     {% if available_deps %}
     <div class="mb-3">
         <label class="form-label">Blocked By (Dependencies)</label>
@@ -119,4 +141,17 @@
     <a href="{{ url_for('projects.list_projects') }}" class="btn btn-outline-secondary">Cancel</a>
     {% endif %}
 </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function addMilestoneRow() {
+    var row = document.createElement('div');
+    row.className = 'row g-2 mb-2 milestone-row';
+    row.innerHTML = '<div class="col"><input type="text" class="form-control form-control-sm" name="milestone_names" placeholder="Name" required></div>' +
+        '<div class="col-auto"><input type="date" class="form-control form-control-sm" name="milestone_dates" required></div>' +
+        '<div class="col-auto"><button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest(\'.milestone-row\').remove()">&times;</button></div>';
+    document.getElementById('milestones-list').appendChild(row);
+}
+</script>
 {% endblock %}

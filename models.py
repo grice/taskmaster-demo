@@ -53,6 +53,8 @@ class Task(db.Model):
     assignments = db.relationship('TaskAssignment', backref='task', lazy=True,
                                    cascade='all, delete-orphan')
     tags = db.relationship('Tag', secondary=task_tags, backref=db.backref('tasks', lazy=True))
+    milestones = db.relationship('Milestone', backref='task', lazy=True,
+                                 order_by='Milestone.date', cascade='all, delete-orphan')
     status_updates = db.relationship('StatusUpdate', backref='task', lazy=True,
                                      order_by='StatusUpdate.created_at.desc()',
                                      cascade='all, delete-orphan')
@@ -104,6 +106,25 @@ class TaskAssignment(db.Model):
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
+
+
+class Milestone(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    status_override = db.Column(db.String(20), nullable=True)  # on_track, delayed, on_hold
+
+    @property
+    def computed_status(self):
+        if self.status_override:
+            return self.status_override
+        today = date.today()
+        if self.task.project.status == 'on_hold':
+            return 'on_hold'
+        if self.date < today and self.task.status != 'done':
+            return 'delayed'
+        return 'on_track'
 
 
 class StatusUpdate(db.Model):

@@ -3,7 +3,7 @@ import re
 from markupsafe import Markup, escape
 from flask import Flask, render_template
 from flask_migrate import Migrate
-from models import db, Project, Task, Person, Team
+from models import db, Project, Task, Person, Team, Milestone
 from flask import url_for as flask_url_for
 from routes import register_blueprints
 from datetime import date

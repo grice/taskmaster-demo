@@ -10,7 +10,7 @@ import sys
 from datetime import date, datetime
 from app import create_app
 from models import (db, Team, Person, Project, Task, TaskAssignment,
-                    TaskDependency, Tag, StatusUpdate, task_tags,
+                    TaskDependency, Tag, Milestone, StatusUpdate, task_tags,
                     status_update_mentions)
 
 app = create_app()
@@ -24,6 +24,7 @@ TABLES = [
     ('tasks.csv', Task, ['id', 'title', 'description', 'project_id', 'start_date', 'end_date', 'status', 'priority']),
     ('task_assignments.csv', TaskAssignment, ['id', 'task_id', 'person_id', 'is_lead']),
     ('task_dependencies.csv', TaskDependency, ['id', 'task_id', 'depends_on_id']),
+    ('milestones.csv', Milestone, ['id', 'task_id', 'name', 'date', 'status_override']),
     ('status_updates.csv', StatusUpdate, ['id', 'task_id', 'content', 'created_at']),
 ]
 
