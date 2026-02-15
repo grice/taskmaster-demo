@@ -178,3 +178,119 @@
 .popup-wrapper {
     display: none !important;
 }
+
+/* ---- Dark theme overrides ---- */
+[data-bs-theme="dark"] body {
+    color-scheme: dark;
+}
+
+[data-bs-theme="dark"] .workload-bar {
+    background: #495057;
+}
+
+[data-bs-theme="dark"] .card-hover:hover {
+    box-shadow: 0 4px 12px rgba(255,255,255,0.05);
+}
+
+[data-bs-theme="dark"] .stat-card .stat-label {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .status-timeline {
+    border-left-color: #495057;
+}
+
+[data-bs-theme="dark"] .mention-tag {
+    background-color: #1a3a5c;
+    color: #6ea8fe;
+}
+
+[data-bs-theme="dark"] .mention-dropdown {
+    background: #212529;
+    border-color: #495057;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+[data-bs-theme="dark"] .mention-dropdown .mention-item:hover,
+[data-bs-theme="dark"] .mention-dropdown .mention-item.active {
+    background-color: #1a3a5c;
+}
+
+[data-bs-theme="dark"] .mention-dropdown .mention-item .mention-hint {
+    color: #adb5bd;
+}
+
+/* Gantt chart dark mode — grid & background */
+[data-bs-theme="dark"] .gantt .grid-header {
+    fill: #1a1d21;
+}
+[data-bs-theme="dark"] .gantt .grid-row {
+    fill: #212529;
+}
+[data-bs-theme="dark"] .gantt .grid-row:nth-child(even) {
+    fill: #2b3035;
+}
+[data-bs-theme="dark"] .gantt .header-border {
+    stroke: #495057;
+}
+[data-bs-theme="dark"] .gantt .row-line {
+    stroke: #343a40;
+}
+[data-bs-theme="dark"] .gantt .tick {
+    stroke: #343a40;
+}
+[data-bs-theme="dark"] .gantt .today-highlight {
+    fill: rgba(56, 132, 255, 0.12);
+}
+
+/* Gantt dark mode — text */
+[data-bs-theme="dark"] .gantt .lower-text,
+[data-bs-theme="dark"] .gantt .upper-text {
+    fill: #ced4da;
+}
+[data-bs-theme="dark"] .gantt .bar-label {
+    fill: #f8f9fa;
+}
+
+/* Gantt dark mode — bars (brighter for contrast on dark bg) */
+[data-bs-theme="dark"] .gantt .bar.status-todo .bar-progress,
+[data-bs-theme="dark"] .gantt .bar.status-todo .bar-wrapper .bar {
+    fill: #6c757d;
+}
+[data-bs-theme="dark"] .gantt .bar.status-in_progress .bar-progress,
+[data-bs-theme="dark"] .gantt .bar.status-in_progress .bar-wrapper .bar {
+    fill: #3d8bfd;
+}
+[data-bs-theme="dark"] .gantt .bar.status-done .bar-progress,
+[data-bs-theme="dark"] .gantt .bar.status-done .bar-wrapper .bar {
+    fill: #20c997;
+}
+
+/* Gantt dark mode — default bar (no status class) */
+[data-bs-theme="dark"] .gantt .bar-wrapper .bar {
+    fill: #5a6570;
+}
+[data-bs-theme="dark"] .gantt .bar-progress {
+    fill: #6c757d;
+}
+
+/* Gantt dark mode — dependency arrows */
+[data-bs-theme="dark"] .gantt .arrow {
+    stroke: #6c757d;
+    fill: none;
+}
+
+/* Gantt dark mode — resize handles */
+[data-bs-theme="dark"] .gantt .handle {
+    fill: #adb5bd;
+}
+
+/* Gantt dark mode — priority accents (brighter strokes) */
+[data-bs-theme="dark"] .gantt .bar.priority-critical .bar-wrapper .bar {
+    stroke: #ff6b7a;
+    stroke-width: 2;
+}
+[data-bs-theme="dark"] .gantt .bar.priority-high .bar-wrapper .bar {
+    stroke: #ffb347;
+    stroke-width: 2;
+}

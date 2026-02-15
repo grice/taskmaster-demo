@@ -27,6 +27,10 @@
                         <a class="nav-link" href="{{ url_for('teams.list_teams') }}">Teams</a>
                     </li>
                 </ul>
+                <button id="theme-toggle" class="btn btn-outline-light btn-sm ms-auto" title="Toggle dark mode">
+                    <span id="theme-icon-light">&#9790;</span>
+                    <span id="theme-icon-dark" style="display:none;">&#9728;</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -38,6 +42,28 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
     <script src="{{ url_for('static', filename='mention-autocomplete.js') }}"></script>
+    <script>
+    (function() {
+        const btn = document.getElementById('theme-toggle');
+        const iconLight = document.getElementById('theme-icon-light');
+        const iconDark = document.getElementById('theme-icon-dark');
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark') {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            iconLight.style.display = 'none';
+            iconDark.style.display = '';
+        }
+        btn.addEventListener('click', function() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-bs-theme') === 'dark';
+            const next = isDark ? 'light' : 'dark';
+            html.setAttribute('data-bs-theme', next);
+            localStorage.setItem('theme', next);
+            iconLight.style.display = isDark ? '' : 'none';
+            iconDark.style.display = isDark ? 'none' : '';
+        });
+    })();
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
