@@ -9,6 +9,24 @@
     font-size: 0.9rem;
 }
 
+/* Milestone inline date picker — looks like text, opens picker on click */
+.milestone-date-input {
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-size: 0.875rem;
+    padding: 0;
+    cursor: pointer;
+    width: 120px;
+}
+.milestone-date-input:hover {
+    text-decoration: underline;
+}
+.milestone-date-input:focus {
+    outline: none;
+    text-decoration: underline;
+}
+
 /* Priority badges */
 .badge-low { background-color: #6c757d; }
 .badge-medium { background-color: #0d6efd; }

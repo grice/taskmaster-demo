@@ -183,10 +183,16 @@ def add_milestone(id):
     return redirect(url_for('tasks.detail', id=task.id))
 
 
-@bp.route('/milestones/<int:id>/status', methods=['POST'])
-def update_milestone_status(id):
+@bp.route('/milestones/<int:id>/update', methods=['POST'])
+def update_milestone(id):
     milestone = Milestone.query.get_or_404(id)
+    name = request.form.get('name', '').strip()
+    ms_date = request.form.get('date', '')
     status = request.form.get('status_override', '')
+    if name:
+        milestone.name = name
+    if ms_date:
+        milestone.date = date.fromisoformat(ms_date)
     milestone.status_override = status if status else None
     db.session.commit()
     return redirect(url_for('tasks.detail', id=milestone.task_id))
