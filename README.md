@@ -65,5 +65,8 @@ Import replaces all existing data. You will be prompted to confirm before procee
 - **Project Gantt view** — interactive timeline with drag-to-resize, dependency arrows, and click-to-edit popups. Zoom between Day/Week/Month/Year.
 - **People workload view** — see each person's tasks across all projects, with workload bars and a timeline.
 - **Multi-assignee tasks** — assign multiple people to a task with one designated as lead.
-- **Status updates** — append updates to any task with `@"First Last"` mentions that link to person pages.
+- **Milestones** — add multiple milestone markers per task with name, date, and status (auto-calculated or manual override). Displayed as color-coded diamonds on the Gantt chart. Upcoming milestones shown on project and person pages. Click the date on the task page to change it.
+- **Status updates** — append updates to any task with `@"First Last"` mentions that link to person pages. File URLs (SharePoint, etc.) automatically condense to show an icon + filename.
 - **Tags, priorities, dependencies** — categorize tasks with free-form tags, priority levels, and blocked-by relationships.
+- **Dark mode** — toggle via the moon/sun icon in the navbar. Preference persists across sessions via localStorage.
+- **Database export/import** — back up and restore all data (including milestones) as CSV files with automatic backup before import.

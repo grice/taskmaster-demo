@@ -97,7 +97,7 @@ def import_db(input_dir):
                         if col.endswith('_id') and row.get(col) is not None:
                             row[col] = int(row[col])
                         # Date fields (YYYY-MM-DD)
-                        if col.endswith('_date') and col != 'created_at' and row.get(col) is not None:
+                        if (col == 'date' or col.endswith('_date')) and col != 'created_at' and row.get(col) is not None:
                             row[col] = date.fromisoformat(row[col])
                         # Datetime fields
                         if col == 'created_at' and row.get(col) is not None:
