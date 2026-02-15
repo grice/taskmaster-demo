@@ -300,14 +300,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('popup-status').value = statusMatch[1];
                 }
 
+                var container = document.querySelector('.gantt-container');
+                var cRect = container.getBoundingClientRect();
+                var popupHeight = 250;
                 var bar = e.target.closest('.bar-wrapper');
                 if (bar) {
                     var rect = bar.getBoundingClientRect();
-                    popup.style.top = (rect.bottom + 8) + 'px';
-                    popup.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
+                    var left = Math.max(rect.left, cRect.left);
+                    left = Math.min(left, cRect.right - 320);
+                    var top = rect.bottom + 8;
+                    if (top + popupHeight > window.innerHeight) {
+                        top = rect.top - popupHeight - 8;
+                    }
+                    popup.style.top = top + 'px';
+                    popup.style.left = left + 'px';
                 } else {
-                    popup.style.top = (e.clientY + 10) + 'px';
-                    popup.style.left = Math.min(e.clientX, window.innerWidth - 320) + 'px';
+                    var left = Math.max(e.clientX, cRect.left);
+                    left = Math.min(left, cRect.right - 320);
+                    var top = e.clientY + 10;
+                    if (top + popupHeight > window.innerHeight) {
+                        top = e.clientY - popupHeight - 10;
+                    }
+                    popup.style.top = top + 'px';
+                    popup.style.left = left + 'px';
                 }
                 popup.style.display = 'block';
             }
