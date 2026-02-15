@@ -9,6 +9,19 @@
     font-size: 0.9rem;
 }
 
+/* File link with icon */
+.file-link {
+    text-decoration: none;
+}
+.file-link::before {
+    content: '\1F4CE';
+    margin-right: 3px;
+    font-size: 0.85em;
+}
+.file-link:hover {
+    text-decoration: underline;
+}
+
 /* Milestone inline date picker — looks like text, opens picker on click */
 .milestone-date-input {
     border: none;

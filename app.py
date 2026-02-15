@@ -34,10 +34,30 @@ def create_app():
     @app.template_filter('render_mentions')
     def render_mentions(content):
         """Replace @"Name" with clickable links, and URLs with hyperlinks."""
-        # Linkify URLs first (on raw text, before escaping)
+        # File extensions to detect for condensed display
+        from urllib.parse import urlparse, unquote
+        FILE_EXTS = {'.doc', '.docx', '.pdf', '.txt', '.rtf', '.odt',
+                     '.xls', '.xlsx', '.csv', '.ods',
+                     '.ppt', '.pptx', '.odp',
+                     '.png', '.jpg', '.jpeg', '.gif', '.svg',
+                     '.zip', '.tar', '.gz', '.7z',
+                     '.py', '.js', '.html', '.css', '.json', '.md'}
+
         def replace_url(m):
-            url = escape(m.group(0))
-            return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a>'
+            raw_url = m.group(0)
+            safe_url = escape(raw_url)
+            # Check if URL path ends with a file extension
+            try:
+                parsed = urlparse(raw_url)
+                path = unquote(parsed.path)
+                filename = path.rsplit('/', 1)[-1] if '/' in path else path
+                ext = '.' + filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+                if ext in FILE_EXTS and filename:
+                    safe_name = escape(filename)
+                    return f'<a href="{safe_url}" target="_blank" rel="noopener noreferrer" class="file-link">{safe_name}</a>'
+            except Exception:
+                pass
+            return f'<a href="{safe_url}" target="_blank" rel="noopener noreferrer">{safe_url}</a>'
         result = re.sub(r'https?://[^\s<>"]+', replace_url, content)
         # Then render @mentions on raw text (before escaping the rest)
         def replace_mention(m):
