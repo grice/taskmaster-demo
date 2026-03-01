@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Flask instance folder (contains the SQLite database)
+instance/
+
+# pytest
+.pytest_cache/
+
+# Database backups created by dbutil.py
+backup_*/
+
+# Environment
+.env
+.venv/
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
