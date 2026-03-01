@@ -1,7 +1,9 @@
 """Tests for project CRUD routes."""
 from datetime import date
+from io import BytesIO
+import openpyxl
 from models import Project
-from tests.conftest import make_project, make_task
+from tests.conftest import make_project, make_task, make_milestone
 
 
 class TestProjectList:
@@ -138,6 +140,62 @@ class TestDeleteProject:
         r = client.post(f'/projects/{p.id}/delete')
         assert r.status_code == 302
         assert '/projects' in r.headers['Location']
+
+class TestExcelExport:
+    def test_returns_xlsx(self, client, db):
+        p = make_project('Export Me')
+        r = client.get(f'/projects/{p.id}/export/excel')
+        assert r.status_code == 200
+        assert r.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+    def test_filename_contains_project_name(self, client, db):
+        p = make_project('My Project')
+        r = client.get(f'/projects/{p.id}/export/excel')
+        disposition = r.headers.get('Content-Disposition', '')
+        assert 'My_Project_gantt.xlsx' in disposition
+
+    def test_spreadsheet_has_correct_headers(self, client, db):
+        p = make_project()
+        r = client.get(f'/projects/{p.id}/export/excel')
+        wb = openpyxl.load_workbook(BytesIO(r.data))
+        ws = wb['Gantt Data']
+        headers = [ws.cell(row=1, column=c).value for c in range(1, 8)]
+        assert headers == ['Task', 'Start Date', 'End Date', 'Status', 'Priority', 'Assignees', 'Tags']
+
+    def test_spreadsheet_contains_task_data(self, client, db):
+        p = make_project()
+        make_task(p, 'Design Phase', status='in_progress', priority='high')
+        r = client.get(f'/projects/{p.id}/export/excel')
+        wb = openpyxl.load_workbook(BytesIO(r.data))
+        ws = wb['Gantt Data']
+        titles = [ws.cell(row=i, column=1).value for i in range(2, ws.max_row + 1)]
+        assert 'Design Phase' in titles
+
+    def test_spreadsheet_includes_milestones(self, client, db):
+        p = make_project()
+        t = make_task(p)
+        make_milestone(t, 'Launch', date(2025, 6, 1))
+        r = client.get(f'/projects/{p.id}/export/excel')
+        wb = openpyxl.load_workbook(BytesIO(r.data))
+        ws = wb['Gantt Data']
+        # Milestone 1 header should be present
+        headers = [ws.cell(row=1, column=c).value for c in range(1, ws.max_column + 1)]
+        assert 'Milestone 1' in headers
+        assert 'Milestone 1 Date' in headers
+
+    def test_project_info_sheet_exists(self, client, db):
+        p = make_project('Info Sheet Test')
+        r = client.get(f'/projects/{p.id}/export/excel')
+        wb = openpyxl.load_workbook(BytesIO(r.data))
+        assert 'Project Info' in wb.sheetnames
+        meta = wb['Project Info']
+        names = [meta.cell(row=i, column=2).value for i in range(1, 4)]
+        assert 'Info Sheet Test' in names
+
+    def test_404_for_missing_project(self, client):
+        r = client.get('/projects/99999/export/excel')
+        assert r.status_code == 404
+
 
     def test_deletes_cascade_to_tasks(self, client, db):
         from models import Task
