@@ -17,10 +17,6 @@
     <div>
         <a href="{{ url_for('tasks.new_task', project_id=project.id) }}" class="btn btn-primary btn-sm">Add Task</a>
         <a href="{{ url_for('projects.edit_project', id=project.id) }}" class="btn btn-outline-secondary btn-sm">Edit</a>
-        <form method="post" action="{{ url_for('projects.delete_project', id=project.id) }}" class="d-inline"
-              onsubmit="return confirm('Delete this project and all its tasks?')">
-            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-        </form>
     </div>
 </div>
 

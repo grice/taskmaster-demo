@@ -14,10 +14,6 @@
     <h1>{{ task.title }}</h1>
     <div>
         <a href="{{ url_for('tasks.edit_task', id=task.id) }}" class="btn btn-outline-secondary btn-sm">Edit</a>
-        <form method="post" action="{{ url_for('tasks.delete_task', id=task.id) }}" class="d-inline"
-              onsubmit="return confirm('Delete this task?')">
-            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-        </form>
     </div>
 </div>
 
@@ -74,10 +70,7 @@
                                     <option value="on_hold" {{ 'selected' if ms.status_override == 'on_hold' else '' }}>On Hold</option>
                                 </select>
                             </form>
-                            <form method="post" action="{{ url_for('tasks.delete_milestone', id=ms.id) }}" class="d-inline"
-                                  onsubmit="return confirm('Delete this milestone?')">
-                                <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-1" style="font-size:0.7rem;">&times;</button>
-                            </form>
+                            <a href="{{ url_for('tasks.delete_milestone', id=ms.id) }}" class="btn btn-outline-danger btn-sm py-0 px-1" style="font-size:0.7rem;">&times;</a>
                         </div>
                     </div>
                     {% endfor %}

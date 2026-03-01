@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Tasks - Taskmaster{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>
+            {% if overdue %}Overdue Tasks
+            {% elif status_filter == 'in_progress' %}In Progress Tasks
+            {% elif status_filter == 'todo' %}Todo Tasks
+            {% elif status_filter == 'done' %}Completed Tasks
+            {% else %}All Tasks
+            {% endif %}
+        </h1>
+    </div>
+    <a href="{{ url_for('projects.list_projects') }}" class="btn btn-outline-secondary btn-sm">All Projects</a>
+</div>
+
+{% if tasks %}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Project</th>
+                <th>Assigned</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Due</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td><a href="{{ url_for('tasks.detail', id=task.id) }}">{{ task.title }}</a></td>
+                <td><a href="{{ url_for('projects.detail', id=task.project.id) }}">{{ task.project.name }}</a></td>
+                <td>
+                    {% if task.assignees %}
+                        {% for person in task.assignees %}
+                        <a href="{{ url_for('people.detail', id=person.id) }}">{{ person.name }}</a>{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                    <span class="text-muted">Unassigned</span>
+                    {% endif %}
+                </td>
+                <td><span class="badge badge-{{ task.status }}">{{ task.status | replace('_', ' ') | title }}</span></td>
+                <td><span class="badge badge-{{ task.priority }}">{{ task.priority | title }}</span></td>
+                <td class="small {% if task.end_date < today and task.status != 'done' %}text-danger fw-semibold{% endif %}">
+                    {{ task.end_date }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <p class="text-muted">No tasks found.</p>
+</div>
+{% endif %}
+{% endblock %}

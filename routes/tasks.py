@@ -6,6 +6,21 @@ from datetime import date
 bp = Blueprint('tasks', __name__)
 
 
+@bp.route('/tasks')
+def list_tasks():
+    status_filter = request.args.get('status', '')
+    overdue = request.args.get('overdue', '')
+    q = Task.query
+    if overdue:
+        q = q.filter(Task.end_date < date.today(), Task.status != 'done')
+    elif status_filter:
+        q = q.filter_by(status=status_filter)
+    tasks = q.order_by(Task.end_date).all()
+    return render_template('tasks/list.html', tasks=tasks,
+                           status_filter=status_filter, overdue=overdue,
+                           today=date.today())
+
+
 @bp.route('/tasks/new', methods=['GET', 'POST'])
 def new_task():
     if request.method == 'POST':
@@ -198,19 +213,29 @@ def update_milestone(id):
     return redirect(url_for('tasks.detail', id=milestone.task_id))
 
 
-@bp.route('/milestones/<int:id>/delete', methods=['POST'])
+@bp.route('/milestones/<int:id>/delete', methods=['GET', 'POST'])
 def delete_milestone(id):
     milestone = Milestone.query.get_or_404(id)
     task_id = milestone.task_id
-    db.session.delete(milestone)
-    db.session.commit()
-    return redirect(url_for('tasks.detail', id=task_id))
+    if request.method == 'POST':
+        db.session.delete(milestone)
+        db.session.commit()
+        return redirect(url_for('tasks.detail', id=task_id))
+    return render_template('confirm_delete.html',
+                           title='Delete Milestone',
+                           message=f'Are you sure you want to delete the milestone "{milestone.name}"?',
+                           cancel_url=url_for('tasks.detail', id=task_id))
 
 
-@bp.route('/tasks/<int:id>/delete', methods=['POST'])
+@bp.route('/tasks/<int:id>/delete', methods=['GET', 'POST'])
 def delete_task(id):
     task = Task.query.get_or_404(id)
     project_id = task.project_id
-    db.session.delete(task)
-    db.session.commit()
-    return redirect(url_for('projects.detail', id=project_id))
+    if request.method == 'POST':
+        db.session.delete(task)
+        db.session.commit()
+        return redirect(url_for('projects.detail', id=project_id))
+    return render_template('confirm_delete.html',
+                           title='Delete Task',
+                           message=f'Are you sure you want to delete task "{task.title}"? This cannot be undone.',
+                           cancel_url=url_for('tasks.detail', id=task.id))

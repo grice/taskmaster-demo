@@ -37,6 +37,11 @@
         </select>
     </div>
     <button type="submit" class="btn btn-primary">{{ 'Update' if project else 'Create' }} Project</button>
+    {% if project %}
+    <a href="{{ url_for('projects.detail', id=project.id) }}" class="btn btn-outline-secondary">Cancel</a>
+    <a href="{{ url_for('projects.delete_project', id=project.id) }}" class="btn btn-outline-danger ms-2">Delete Project</a>
+    {% else %}
     <a href="{{ url_for('projects.list_projects') }}" class="btn btn-outline-secondary">Cancel</a>
+    {% endif %}
 </form>
 {% endblock %}

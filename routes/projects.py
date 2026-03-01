@@ -7,8 +7,12 @@ bp = Blueprint('projects', __name__)
 
 @bp.route('/projects')
 def list_projects():
-    projects = Project.query.order_by(Project.start_date.desc()).all()
-    return render_template('projects/list.html', projects=projects)
+    status_filter = request.args.get('status', '')
+    q = Project.query
+    if status_filter:
+        q = q.filter_by(status=status_filter)
+    projects = q.order_by(Project.start_date.desc()).all()
+    return render_template('projects/list.html', projects=projects, status_filter=status_filter)
 
 
 @bp.route('/projects/new', methods=['GET', 'POST'])
@@ -60,12 +64,17 @@ def edit_project(id):
     return render_template('projects/form.html', project=project)
 
 
-@bp.route('/projects/<int:id>/delete', methods=['POST'])
+@bp.route('/projects/<int:id>/delete', methods=['GET', 'POST'])
 def delete_project(id):
     project = Project.query.get_or_404(id)
-    db.session.delete(project)
-    db.session.commit()
-    return redirect(url_for('projects.list_projects'))
+    if request.method == 'POST':
+        db.session.delete(project)
+        db.session.commit()
+        return redirect(url_for('projects.list_projects'))
+    return render_template('confirm_delete.html',
+                           title='Delete Project',
+                           message=f'Are you sure you want to delete project "{project.name}" and all its tasks? This cannot be undone.',
+                           cancel_url=url_for('projects.detail', id=project.id))
 
 
 @bp.route('/projects/<int:id>/gantt-data')

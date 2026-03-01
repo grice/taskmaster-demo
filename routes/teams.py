@@ -30,9 +30,14 @@ def edit_team(id):
     return render_template('teams/form.html', team=team)
 
 
-@bp.route('/teams/<int:id>/delete', methods=['POST'])
+@bp.route('/teams/<int:id>/delete', methods=['GET', 'POST'])
 def delete_team(id):
     team = Team.query.get_or_404(id)
-    db.session.delete(team)
-    db.session.commit()
-    return redirect(url_for('teams.list_teams'))
+    if request.method == 'POST':
+        db.session.delete(team)
+        db.session.commit()
+        return redirect(url_for('teams.list_teams'))
+    return render_template('confirm_delete.html',
+                           title='Delete Team',
+                           message=f'Are you sure you want to delete team "{team.name}"?',
+                           cancel_url=url_for('teams.list_teams'))

@@ -80,9 +80,14 @@ def search_json():
     return jsonify([{'id': p.id, 'name': p.name} for p in people])
 
 
-@bp.route('/people/<int:id>/delete', methods=['POST'])
+@bp.route('/people/<int:id>/delete', methods=['GET', 'POST'])
 def delete_person(id):
     person = Person.query.get_or_404(id)
-    db.session.delete(person)
-    db.session.commit()
-    return redirect(url_for('people.list_people'))
+    if request.method == 'POST':
+        db.session.delete(person)
+        db.session.commit()
+        return redirect(url_for('people.list_people'))
+    return render_template('confirm_delete.html',
+                           title='Delete Person',
+                           message=f'Are you sure you want to delete "{person.name}"? This cannot be undone.',
+                           cancel_url=url_for('people.detail', id=person.id))

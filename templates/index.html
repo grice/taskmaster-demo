@@ -6,28 +6,36 @@
 
 <div class="row g-3 mb-4">
     <div class="col-md-3">
+        <a href="{{ url_for('projects.list_projects', status='active') }}" class="text-decoration-none">
         <div class="card stat-card card-hover">
             <div class="stat-number">{{ active_projects }}</div>
             <div class="stat-label">Active Projects</div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
+        <a href="{{ url_for('tasks.list_tasks') }}" class="text-decoration-none">
         <div class="card stat-card card-hover">
             <div class="stat-number">{{ total_tasks }}</div>
             <div class="stat-label">Total Tasks</div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
+        <a href="{{ url_for('tasks.list_tasks', status='in_progress') }}" class="text-decoration-none">
         <div class="card stat-card card-hover">
             <div class="stat-number text-primary">{{ in_progress_tasks }}</div>
             <div class="stat-label">In Progress Tasks</div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
+        <a href="{{ url_for('tasks.list_tasks', overdue='1') }}" class="text-decoration-none">
         <div class="card stat-card card-hover">
             <div class="stat-number {% if overdue_tasks > 0 %}text-danger{% endif %}">{{ overdue_tasks }}</div>
             <div class="stat-label">Overdue</div>
         </div>
+        </a>
     </div>
 </div>
 

@@ -10,10 +10,7 @@
     </div>
     <div>
         <a href="{{ url_for('people.edit_person', id=person.id) }}" class="btn btn-outline-secondary btn-sm">Edit</a>
-        <form method="post" action="{{ url_for('people.delete_person', id=person.id) }}" class="d-inline"
-              onsubmit="return confirm('Delete this person?')">
-            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-        </form>
+        <a href="{{ url_for('people.delete_person', id=person.id) }}" class="btn btn-outline-danger btn-sm">Delete</a>
     </div>
 </div>
 
