@@ -11,10 +11,13 @@ from datetime import date
 migrate = Migrate()
 
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///taskmaster.db'
     app.config['SECRET_KEY'] = 'dev-secret-key'
+
+    if test_config:
+        app.config.update(test_config)
 
     db.init_app(app)
     migrate.init_app(app, db)
