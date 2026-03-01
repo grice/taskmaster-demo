@@ -27,6 +27,11 @@
         </select>
     </div>
     <button type="submit" class="btn btn-primary">{{ 'Update' if person else 'Add' }} Person</button>
+    {% if person %}
+    <a href="{{ url_for('people.detail', id=person.id) }}" class="btn btn-outline-secondary">Cancel</a>
+    <a href="{{ url_for('people.delete_person', id=person.id) }}" class="btn btn-outline-danger ms-2">Delete Person</a>
+    {% else %}
     <a href="{{ url_for('people.list_people') }}" class="btn btn-outline-secondary">Cancel</a>
+    {% endif %}
 </form>
 {% endblock %}
