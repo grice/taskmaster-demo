@@ -33,7 +33,7 @@
             </a>
             <div class="btn-group btn-group-sm" id="gantt-zoom">
                 <button type="button" class="btn btn-outline-secondary" data-mode="Day">Day</button>
-                <button type="button" class="btn btn-outline-secondary active" data-mode="Week">Week</button>
+                <button type="button" class="btn btn-outline-secondary" data-mode="Week">Week</button>
                 <button type="button" class="btn btn-outline-secondary" data-mode="Month">Month</button>
                 <button type="button" class="btn btn-outline-secondary" data-mode="Year">Year</button>
             </div>
@@ -247,8 +247,14 @@ document.addEventListener('DOMContentLoaded', function() {
             var taskMap = {};
             tasks.forEach(function(t) { taskMap[t.id] = t; });
 
+            var allStarts = tasks.map(function(t) { return new Date(t.start).getTime(); });
+            var allEnds   = tasks.map(function(t) { return new Date(t.end).getTime(); });
+            var spanDays  = (Math.max.apply(null, allEnds) - Math.min.apply(null, allStarts)) / 86400000;
+            var defaultMode = spanDays <= 14 ? 'Day' : spanDays <= 90 ? 'Week' : spanDays <= 548 ? 'Month' : 'Year';
+            document.querySelector('#gantt-zoom [data-mode="' + defaultMode + '"]').classList.add('active');
+
             var gantt = new Gantt("#gantt", tasks, {
-                view_mode: 'Week',
+                view_mode: defaultMode,
                 date_format: 'YYYY-MM-DD',
                 custom_popup_html: function() { return ''; },
                 on_date_change: function(task, start, end) {
