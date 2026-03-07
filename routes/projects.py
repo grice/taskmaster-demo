@@ -1,6 +1,6 @@
 from io import BytesIO
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, send_file
-from models import db, Project, Task, StatusUpdate, Milestone
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, send_file, g
+from models import db, Project, Task, StatusUpdate, Milestone, Workspace
 from datetime import date
 
 bp = Blueprint('projects', __name__)
@@ -11,10 +11,22 @@ PROJECT_COLORS = [
 ]
 
 
+@bp.url_value_preprocessor
+def pull_workspace(endpoint, values):
+    g.workspace_slug = values.pop('workspace_slug', None)
+    g.workspace = Workspace.query.filter_by(slug=g.workspace_slug).first_or_404()
+
+
+@bp.url_defaults
+def inject_workspace(endpoint, values):
+    if 'workspace_slug' not in values and hasattr(g, 'workspace_slug'):
+        values['workspace_slug'] = g.workspace_slug
+
+
 @bp.route('/projects')
 def list_projects():
     status_filter = request.args.get('status', '')
-    q = Project.query
+    q = Project.query.filter_by(workspace_id=g.workspace.id)
     if status_filter:
         q = q.filter_by(status=status_filter)
     projects = q.order_by(Project.start_date.desc()).all()
@@ -31,6 +43,7 @@ def new_project():
             start_date=date.fromisoformat(request.form['start_date']) if request.form.get('start_date') else None,
             end_date=date.fromisoformat(request.form['end_date']) if request.form.get('end_date') else None,
             status=request.form.get('status', 'active'),
+            workspace_id=g.workspace.id,
         )
         db.session.add(project)
         db.session.commit()
@@ -40,7 +53,7 @@ def new_project():
 
 @bp.route('/projects/<int:id>')
 def detail(id):
-    project = Project.query.get_or_404(id)
+    project = Project.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     # Collect all status updates across this project's tasks, newest first
     task_ids = [t.id for t in project.tasks]
     all_updates = StatusUpdate.query.filter(
@@ -57,7 +70,7 @@ def detail(id):
 
 @bp.route('/projects/<int:id>/edit', methods=['GET', 'POST'])
 def edit_project(id):
-    project = Project.query.get_or_404(id)
+    project = Project.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     if request.method == 'POST':
         from datetime import date
         project.name = request.form['name']
@@ -72,7 +85,7 @@ def edit_project(id):
 
 @bp.route('/projects/<int:id>/delete', methods=['GET', 'POST'])
 def delete_project(id):
-    project = Project.query.get_or_404(id)
+    project = Project.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     if request.method == 'POST':
         db.session.delete(project)
         db.session.commit()
@@ -85,7 +98,7 @@ def delete_project(id):
 
 @bp.route('/projects/dashboard-gantt-data')
 def dashboard_gantt_data():
-    active_projects = Project.query.filter_by(status='active').order_by(Project.name).all()
+    active_projects = Project.query.filter_by(workspace_id=g.workspace.id, status='active').order_by(Project.name).all()
     tasks = []
     legend = []
     for idx, project in enumerate(active_projects):
@@ -113,7 +126,7 @@ def export_excel(id):
     from openpyxl.styles.fills import FILL_SOLID
     from openpyxl.utils import get_column_letter
 
-    project = Project.query.get_or_404(id)
+    project = Project.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -219,7 +232,7 @@ def export_excel(id):
 
 @bp.route('/projects/<int:id>/gantt-data')
 def gantt_data(id):
-    project = Project.query.get_or_404(id)
+    project = Project.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     tasks = []
     for task in project.tasks:
         dep_ids = ','.join(f'task-{d.id}' for d in task.dependencies)

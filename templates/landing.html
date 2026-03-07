@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Taskmaster — Workspaces{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Workspaces</h1>
+    <a href="{{ url_for('workspaces.new_workspace') }}" class="btn btn-primary">New Workspace</a>
+</div>
+
+{% if workspaces %}
+<div class="row g-3">
+    {% for ws in workspaces %}
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title mb-1">{{ ws.name }}</h5>
+                <p class="text-muted small mb-3"><code>/w/{{ ws.slug }}/</code></p>
+                <a href="{{ url_for('workspace_dashboard', workspace_slug=ws.slug) }}" class="btn btn-primary btn-sm">Open</a>
+                <a href="{{ url_for('workspaces.edit_workspace', slug=ws.slug) }}" class="btn btn-outline-secondary btn-sm">Edit</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <p class="text-muted">No workspaces yet.</p>
+    <a href="{{ url_for('workspaces.new_workspace') }}" class="btn btn-primary">Create your first workspace</a>
+</div>
+{% endif %}
+{% endblock %}

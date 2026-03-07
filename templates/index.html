@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - Taskmaster{% endblock %}
+{% block title %}{{ workspace.name }} — Dashboard - Taskmaster{% endblock %}
 
 {% block content %}
 <h1 class="mb-4">Dashboard</h1>
@@ -140,8 +140,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var tooltip = document.getElementById('dg-tooltip');
+    var BASE_URL = '/w/{{ g.workspace.slug }}';
 
-    fetch('/projects/dashboard-gantt-data')
+    fetch(BASE_URL + '/projects/dashboard-gantt-data')
         .then(r => r.json())
         .then(function(data) {
             // Empty state
@@ -155,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var legend = document.getElementById('dg-legend');
             data.legend.forEach(function(proj) {
                 var a = document.createElement('a');
-                a.href = '/projects/' + proj.id;
+                a.href = BASE_URL + '/projects/' + proj.id;
                 a.className = 'badge text-decoration-none';
                 a.style.backgroundColor = proj.color;
                 a.style.color = '#fff';
@@ -181,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     bar.addEventListener('click', function() {
                         var t = taskMap[bar.getAttribute('data-id')];
-                        if (t) window.location.href = '/projects/' + t.project_id;
+                        if (t) window.location.href = BASE_URL + '/projects/' + t.project_id;
                     });
 
                     bar.addEventListener('mouseenter', function() {

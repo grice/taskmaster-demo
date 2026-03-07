@@ -1,6 +1,7 @@
 /**
  * @mention autocomplete for textareas.
  * Attach to any textarea by adding the class "mention-input".
+ * The textarea must have a data-workspace attribute with the workspace slug.
  */
 (function() {
     var dropdown = null;
@@ -74,8 +75,9 @@
         return div.innerHTML;
     }
 
-    function fetchPeople(query) {
-        fetch('/people/search.json?q=' + encodeURIComponent(query))
+    function fetchPeople(query, workspaceSlug) {
+        var url = '/w/' + workspaceSlug + '/people/search.json?q=' + encodeURIComponent(query);
+        fetch(url)
             .then(function(r) { return r.json(); })
             .then(function(results) {
                 showDropdown(results, activeTextarea);
@@ -86,6 +88,9 @@
         var ta = e.target;
         if (!ta.matches || !ta.matches('textarea.mention-input')) return;
         activeTextarea = ta;
+
+        var workspaceSlug = ta.getAttribute('data-workspace');
+        if (!workspaceSlug) return;
 
         var pos = ta.selectionStart;
         var text = ta.value.substring(0, pos);
@@ -117,10 +122,10 @@
         if (query.length === 0) {
             // Show all people on bare @
             mentionStart = atIndex;
-            fetchPeople('');
+            fetchPeople('', workspaceSlug);
         } else if (query.length >= 1) {
             mentionStart = atIndex;
-            fetchPeople(query);
+            fetchPeople(query, workspaceSlug);
         } else {
             hideDropdown();
         }

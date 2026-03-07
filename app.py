@@ -1,9 +1,9 @@
 import os
 import re
 from markupsafe import Markup, escape
-from flask import Flask, render_template
+from flask import Flask, render_template, g
 from flask_migrate import Migrate
-from models import db, Project, Task, Person, Team, Milestone
+from models import db, Project, Task, Person, Team, Milestone, Workspace
 from flask import url_for as flask_url_for
 from routes import register_blueprints
 from datetime import date
@@ -37,7 +37,6 @@ def create_app(test_config=None):
     @app.template_filter('render_mentions')
     def render_mentions(content):
         """Replace @"Name" with clickable links, and URLs with hyperlinks."""
-        # File extensions to detect for condensed display
         from urllib.parse import urlparse, unquote
         FILE_EXTS = {'.doc', '.docx', '.pdf', '.txt', '.rtf', '.odt',
                      '.xls', '.xlsx', '.csv', '.ods',
@@ -49,7 +48,6 @@ def create_app(test_config=None):
         def replace_url(m):
             raw_url = m.group(0)
             safe_url = escape(raw_url)
-            # Check if URL path ends with a file extension
             try:
                 parsed = urlparse(raw_url)
                 path = unquote(parsed.path)
@@ -62,18 +60,23 @@ def create_app(test_config=None):
                 pass
             return f'<a href="{safe_url}" target="_blank" rel="noopener noreferrer">{safe_url}</a>'
         result = re.sub(r'https?://[^\s<>"]+', replace_url, content)
-        # Then render @mentions on raw text (before escaping the rest)
+
         def replace_mention(m):
             name = m.group(1) or m.group(2)
             safe_name = escape(name.strip())
-            person = Person.query.filter(Person.name.ilike(name.strip())).first()
+            workspace = getattr(g, 'workspace', None)
+            if workspace:
+                person = Person.query.filter_by(workspace_id=workspace.id).filter(
+                    Person.name.ilike(name.strip())
+                ).first()
+            else:
+                person = Person.query.filter(Person.name.ilike(name.strip())).first()
             if person:
-                url = flask_url_for('people.detail', id=person.id)
+                url = flask_url_for('people.detail', id=person.id,
+                                    workspace_slug=getattr(g, 'workspace_slug', None))
                 return f'<a href="{url}" class="mention-tag text-decoration-none">@{safe_name}</a>'
             return f'<span class="mention-tag">@{safe_name}</span>'
         result = re.sub(r'@"([^"]+)"|@(\w+(?:\s\w+)?)', replace_mention, result)
-        # Escape any remaining raw text that isn't already wrapped in tags
-        # Split on HTML tags, escape non-tag parts
         parts = re.split(r'(<[^>]+>)', result)
         for i, part in enumerate(parts):
             if not part.startswith('<'):
@@ -82,21 +85,32 @@ def create_app(test_config=None):
 
     @app.route('/')
     def index():
-        total_projects = Project.query.count()
-        active_projects = Project.query.filter_by(status='active').count()
-        total_tasks = Task.query.count()
-        todo_tasks = Task.query.filter_by(status='todo').count()
-        in_progress_tasks = Task.query.filter_by(status='in_progress').count()
-        done_tasks = Task.query.filter_by(status='done').count()
+        workspaces = Workspace.query.order_by(Workspace.name).all()
+        return render_template('landing.html', workspaces=workspaces)
+
+    @app.route('/w/<workspace_slug>/')
+    def workspace_dashboard(workspace_slug):
+        workspace = Workspace.query.filter_by(slug=workspace_slug).first_or_404()
+        g.workspace = workspace
+        g.workspace_slug = workspace_slug
+
+        total_projects = Project.query.filter_by(workspace_id=workspace.id).count()
+        active_projects = Project.query.filter_by(workspace_id=workspace.id, status='active').count()
+        total_tasks = Task.query.filter_by(workspace_id=workspace.id).count()
+        todo_tasks = Task.query.filter_by(workspace_id=workspace.id, status='todo').count()
+        in_progress_tasks = Task.query.filter_by(workspace_id=workspace.id, status='in_progress').count()
+        done_tasks = Task.query.filter_by(workspace_id=workspace.id, status='done').count()
         overdue_tasks = Task.query.filter(
+            Task.workspace_id == workspace.id,
             Task.end_date < date.today(),
             Task.status != 'done'
         ).count()
-        total_people = Person.query.count()
-        teams = Team.query.all()
-        recent_projects = Project.query.order_by(Project.id.desc()).limit(5).all()
+        total_people = Person.query.filter_by(workspace_id=workspace.id).count()
+        teams = Team.query.filter_by(workspace_id=workspace.id).all()
+        recent_projects = Project.query.filter_by(workspace_id=workspace.id).order_by(Project.id.desc()).limit(5).all()
 
         return render_template('index.html',
+                               workspace=workspace,
                                total_projects=total_projects,
                                active_projects=active_projects,
                                total_tasks=total_tasks,

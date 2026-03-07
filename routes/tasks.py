@@ -1,16 +1,28 @@
 import re
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from models import db, Task, TaskAssignment, Project, Person, Tag, StatusUpdate, TaskDependency, Milestone
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, g
+from models import db, Task, TaskAssignment, Project, Person, Tag, StatusUpdate, TaskDependency, Milestone, Workspace
 from datetime import date
 
 bp = Blueprint('tasks', __name__)
+
+
+@bp.url_value_preprocessor
+def pull_workspace(endpoint, values):
+    g.workspace_slug = values.pop('workspace_slug', None)
+    g.workspace = Workspace.query.filter_by(slug=g.workspace_slug).first_or_404()
+
+
+@bp.url_defaults
+def inject_workspace(endpoint, values):
+    if 'workspace_slug' not in values and hasattr(g, 'workspace_slug'):
+        values['workspace_slug'] = g.workspace_slug
 
 
 @bp.route('/tasks')
 def list_tasks():
     status_filter = request.args.get('status', '')
     overdue = request.args.get('overdue', '')
-    q = Task.query
+    q = Task.query.filter_by(workspace_id=g.workspace.id)
     if overdue:
         q = q.filter(Task.end_date < date.today(), Task.status != 'done')
     elif status_filter:
@@ -28,6 +40,7 @@ def new_task():
             title=request.form['title'],
             description=request.form.get('description', ''),
             project_id=int(request.form['project_id']),
+            workspace_id=g.workspace.id,
             start_date=date.fromisoformat(request.form['start_date']),
             end_date=date.fromisoformat(request.form['end_date']),
             status=request.form.get('status', 'todo'),
@@ -48,9 +61,9 @@ def new_task():
         # Handle tags
         tag_names = [t.strip() for t in request.form.get('tags', '').split(',') if t.strip()]
         for name in tag_names:
-            tag = Tag.query.filter_by(name=name).first()
+            tag = Tag.query.filter_by(workspace_id=g.workspace.id, name=name).first()
             if not tag:
-                tag = Tag(name=name)
+                tag = Tag(name=name, workspace_id=g.workspace.id)
                 db.session.add(tag)
             task.tags.append(tag)
 
@@ -72,12 +85,12 @@ def new_task():
         return redirect(url_for('projects.detail', id=task.project_id))
 
     project_id = request.args.get('project_id', type=int)
-    projects = Project.query.order_by(Project.name).all()
-    people = Person.query.order_by(Person.name).all()
+    projects = Project.query.filter_by(workspace_id=g.workspace.id).order_by(Project.name).all()
+    people = Person.query.filter_by(workspace_id=g.workspace.id).order_by(Person.name).all()
     # Available tasks for dependencies (from the same project)
     available_deps = []
     if project_id:
-        available_deps = Task.query.filter_by(project_id=project_id).all()
+        available_deps = Task.query.filter_by(project_id=project_id, workspace_id=g.workspace.id).all()
     return render_template('tasks/form.html', task=None, projects=projects,
                            people=people, project_id=project_id,
                            available_deps=available_deps)
@@ -85,13 +98,13 @@ def new_task():
 
 @bp.route('/tasks/<int:id>')
 def detail(id):
-    task = Task.query.get_or_404(id)
+    task = Task.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     return render_template('tasks/detail.html', task=task)
 
 
 @bp.route('/tasks/<int:id>/edit', methods=['GET', 'POST'])
 def edit_task(id):
-    task = Task.query.get_or_404(id)
+    task = Task.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     if request.method == 'POST':
         task.title = request.form['title']
         task.description = request.form.get('description', '')
@@ -114,9 +127,9 @@ def edit_task(id):
         task.tags.clear()
         tag_names = [t.strip() for t in request.form.get('tags', '').split(',') if t.strip()]
         for name in tag_names:
-            tag = Tag.query.filter_by(name=name).first()
+            tag = Tag.query.filter_by(workspace_id=g.workspace.id, name=name).first()
             if not tag:
-                tag = Tag(name=name)
+                tag = Tag(name=name, workspace_id=g.workspace.id)
                 db.session.add(tag)
             task.tags.append(tag)
 
@@ -139,10 +152,11 @@ def edit_task(id):
         db.session.commit()
         return redirect(url_for('tasks.detail', id=task.id))
 
-    projects = Project.query.order_by(Project.name).all()
-    people = Person.query.order_by(Person.name).all()
+    projects = Project.query.filter_by(workspace_id=g.workspace.id).order_by(Project.name).all()
+    people = Person.query.filter_by(workspace_id=g.workspace.id).order_by(Person.name).all()
     available_deps = Task.query.filter(
-        Task.project_id == task.project_id, Task.id != task.id
+        Task.project_id == task.project_id, Task.id != task.id,
+        Task.workspace_id == g.workspace.id
     ).all()
     return render_template('tasks/form.html', task=task, projects=projects,
                            people=people, project_id=task.project_id,
@@ -151,7 +165,7 @@ def edit_task(id):
 
 @bp.route('/tasks/<int:id>/status', methods=['POST'])
 def add_status_update(id):
-    task = Task.query.get_or_404(id)
+    task = Task.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     content = request.form.get('content', '').strip()
     if content:
         update = StatusUpdate(task_id=task.id, content=content)
@@ -162,7 +176,9 @@ def add_status_update(id):
         mention_names = re.findall(r'@"([^"]+)"|@(\w+(?:\s\w+)?)', content)
         for groups in mention_names:
             name = groups[0] or groups[1]
-            person = Person.query.filter(Person.name.ilike(name.strip())).first()
+            person = Person.query.filter_by(workspace_id=g.workspace.id).filter(
+                Person.name.ilike(name.strip())
+            ).first()
             if person and person not in update.mentions:
                 update.mentions.append(person)
 
@@ -173,7 +189,7 @@ def add_status_update(id):
 @bp.route('/tasks/<int:id>/quick-update', methods=['POST'])
 def quick_update(id):
     """AJAX endpoint for inline Gantt edits (start, end, status)."""
-    task = Task.query.get_or_404(id)
+    task = Task.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     data = request.get_json()
     if 'start_date' in data:
         task.start_date = date.fromisoformat(data['start_date'])
@@ -187,7 +203,7 @@ def quick_update(id):
 
 @bp.route('/tasks/<int:id>/milestones', methods=['POST'])
 def add_milestone(id):
-    task = Task.query.get_or_404(id)
+    task = Task.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     name = request.form.get('name', '').strip()
     ms_date = request.form.get('date', '')
     if name and ms_date:
@@ -201,6 +217,10 @@ def add_milestone(id):
 @bp.route('/milestones/<int:id>/update', methods=['POST'])
 def update_milestone(id):
     milestone = Milestone.query.get_or_404(id)
+    # Verify the milestone belongs to this workspace via its task
+    if milestone.task.workspace_id != g.workspace.id:
+        from flask import abort
+        abort(404)
     name = request.form.get('name', '').strip()
     ms_date = request.form.get('date', '')
     status = request.form.get('status_override', '')
@@ -216,6 +236,9 @@ def update_milestone(id):
 @bp.route('/milestones/<int:id>/delete', methods=['GET', 'POST'])
 def delete_milestone(id):
     milestone = Milestone.query.get_or_404(id)
+    if milestone.task.workspace_id != g.workspace.id:
+        from flask import abort
+        abort(404)
     task_id = milestone.task_id
     if request.method == 'POST':
         db.session.delete(milestone)
@@ -229,7 +252,7 @@ def delete_milestone(id):
 
 @bp.route('/tasks/<int:id>/delete', methods=['GET', 'POST'])
 def delete_task(id):
-    task = Task.query.get_or_404(id)
+    task = Task.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     project_id = task.project_id
     if request.method == 'POST':
         db.session.delete(task)

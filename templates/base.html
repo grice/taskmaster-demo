@@ -12,11 +12,27 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">Taskmaster</a>
+            {% if g.workspace is defined and g.workspace %}
+            <span class="navbar-text text-light px-1">/</span>
+            <div class="dropdown me-2">
+                <a class="navbar-brand dropdown-toggle" href="{{ url_for('workspace_dashboard', workspace_slug=g.workspace.slug) }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ g.workspace.name }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('index') }}">Switch workspace&hellip;</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('workspaces.edit_workspace', slug=g.workspace.slug) }}">Edit workspace</a></li>
+                </ul>
+            </div>
+            {% endif %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                {% if g.workspace is defined and g.workspace %}
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('workspace_dashboard', workspace_slug=g.workspace.slug) }}">Dashboard</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('projects.list_projects') }}">Projects</a>
                     </li>
@@ -27,6 +43,7 @@
                         <a class="nav-link" href="{{ url_for('teams.list_teams') }}">Teams</a>
                     </li>
                 </ul>
+                {% endif %}
                 <button id="theme-toggle" class="btn btn-outline-light btn-sm ms-auto" title="Toggle dark mode">
                     <span id="theme-icon-light">&#9790;</span>
                     <span id="theme-icon-dark" style="display:none;">&#9728;</span>

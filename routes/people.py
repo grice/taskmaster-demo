@@ -1,13 +1,25 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from models import db, Person, Team, StatusUpdate, Milestone, TaskAssignment
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, g
+from models import db, Person, Team, StatusUpdate, Milestone, TaskAssignment, Workspace
 from datetime import date
 
 bp = Blueprint('people', __name__)
 
 
+@bp.url_value_preprocessor
+def pull_workspace(endpoint, values):
+    g.workspace_slug = values.pop('workspace_slug', None)
+    g.workspace = Workspace.query.filter_by(slug=g.workspace_slug).first_or_404()
+
+
+@bp.url_defaults
+def inject_workspace(endpoint, values):
+    if 'workspace_slug' not in values and hasattr(g, 'workspace_slug'):
+        values['workspace_slug'] = g.workspace_slug
+
+
 @bp.route('/people')
 def list_people():
-    people = Person.query.order_by(Person.name).all()
+    people = Person.query.filter_by(workspace_id=g.workspace.id).order_by(Person.name).all()
     return render_template('people/list.html', people=people)
 
 
@@ -18,17 +30,18 @@ def new_person():
             name=request.form['name'],
             email=request.form.get('email', ''),
             team_id=int(request.form['team_id']) if request.form.get('team_id') else None,
+            workspace_id=g.workspace.id,
         )
         db.session.add(person)
         db.session.commit()
         return redirect(url_for('people.list_people'))
-    teams = Team.query.order_by(Team.name).all()
+    teams = Team.query.filter_by(workspace_id=g.workspace.id).order_by(Team.name).all()
     return render_template('people/form.html', person=None, teams=teams)
 
 
 @bp.route('/people/<int:id>')
 def detail(id):
-    person = Person.query.get_or_404(id)
+    person = Person.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     # Get all tasks this person is assigned to
     person_tasks = [a.task for a in person.assignments]
     # Group tasks by project
@@ -59,21 +72,21 @@ def detail(id):
 
 @bp.route('/people/<int:id>/edit', methods=['GET', 'POST'])
 def edit_person(id):
-    person = Person.query.get_or_404(id)
+    person = Person.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     if request.method == 'POST':
         person.name = request.form['name']
         person.email = request.form.get('email', '')
         person.team_id = int(request.form['team_id']) if request.form.get('team_id') else None
         db.session.commit()
         return redirect(url_for('people.detail', id=person.id))
-    teams = Team.query.order_by(Team.name).all()
+    teams = Team.query.filter_by(workspace_id=g.workspace.id).order_by(Team.name).all()
     return render_template('people/form.html', person=person, teams=teams)
 
 
 @bp.route('/people/search.json')
 def search_json():
     q = request.args.get('q', '').strip()
-    query = Person.query.order_by(Person.name)
+    query = Person.query.filter_by(workspace_id=g.workspace.id).order_by(Person.name)
     if q:
         query = query.filter(Person.name.ilike(f'%{q}%'))
     people = query.limit(10).all()
@@ -82,7 +95,7 @@ def search_json():
 
 @bp.route('/people/<int:id>/delete', methods=['GET', 'POST'])
 def delete_person(id):
-    person = Person.query.get_or_404(id)
+    person = Person.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     if request.method == 'POST':
         db.session.delete(person)
         db.session.commit()

@@ -202,6 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var popup = document.getElementById('gantt-popup');
     var tooltip = document.getElementById('gantt-tooltip');
     var currentTaskId = null;
+    var BASE_URL = '/w/{{ g.workspace.slug }}';
 
     function hidePopup() {
         popup.style.display = 'none';
@@ -222,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!currentTaskId) return;
 
         var numericId = currentTaskId.replace('task-', '');
-        fetch('/tasks/' + numericId + '/quick-update', {
+        fetch(BASE_URL + '/tasks/' + numericId + '/quick-update', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -266,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         taskMap[task.id].start = startStr;
                         taskMap[task.id].end = endStr;
                     }
-                    fetch('/tasks/' + numericId + '/quick-update', {
+                    fetch(BASE_URL + '/tasks/' + numericId + '/quick-update', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ start_date: startStr, end_date: endStr })
@@ -282,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         var cls = taskMap[task.id].custom_class.replace(/status-\w+/, 'status-' + status);
                         taskMap[task.id].custom_class = cls;
                     }
-                    fetch('/tasks/' + numericId + '/quick-update', {
+                    fetch(BASE_URL + '/tasks/' + numericId + '/quick-update', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ status: status })
@@ -301,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('popup-title').textContent = data.name;
                 document.getElementById('popup-start').value = data.start;
                 document.getElementById('popup-end').value = data.end;
-                document.getElementById('popup-detail-link').href = '/tasks/' + numericId;
+                document.getElementById('popup-detail-link').href = BASE_URL + '/tasks/' + numericId;
 
                 var statusMatch = data.custom_class.match(/status-(\w+)/);
                 if (statusMatch) {

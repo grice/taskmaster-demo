@@ -16,9 +16,16 @@ task_tags = db.Table(
 )
 
 
+class Workspace(db.Model):
+    id   = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+
+
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
+    workspace_id = db.Column(db.Integer, db.ForeignKey('workspace.id'), nullable=False)
     members = db.relationship('Person', backref='team', lazy=True)
 
 
@@ -27,6 +34,7 @@ class Person(db.Model):
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120))
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    workspace_id = db.Column(db.Integer, db.ForeignKey('workspace.id'), nullable=False)
     assignments = db.relationship('TaskAssignment', backref='person', lazy=True)
 
 
@@ -37,6 +45,7 @@ class Project(db.Model):
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
     status = db.Column(db.String(20), default='active')  # active, completed, on_hold
+    workspace_id = db.Column(db.Integer, db.ForeignKey('workspace.id'), nullable=False)
     tasks = db.relationship('Task', backref='project', lazy=True, cascade='all, delete-orphan')
 
 
@@ -45,6 +54,7 @@ class Task(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    workspace_id = db.Column(db.Integer, db.ForeignKey('workspace.id'), nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(20), default='todo')  # todo, in_progress, done
@@ -105,7 +115,9 @@ class TaskAssignment(db.Model):
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    workspace_id = db.Column(db.Integer, db.ForeignKey('workspace.id'), nullable=False)
+    __table_args__ = (db.UniqueConstraint('workspace_id', 'name', name='uq_tag_workspace_name'),)
 
 
 class Milestone(db.Model):

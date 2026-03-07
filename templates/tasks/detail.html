@@ -88,6 +88,7 @@
                 <form method="post" action="{{ url_for('tasks.add_status_update', id=task.id) }}" class="mb-4">
                     <div class="mb-1">
                         <textarea class="form-control mention-input" name="content" rows="2"
+                                  data-workspace="{{ g.workspace.slug }}"
                                   placeholder='Add a status update... Type @ to mention people'></textarea>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
