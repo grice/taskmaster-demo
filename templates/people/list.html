@@ -18,8 +18,8 @@
                         {{ person.name }}
                     </a>
                 </h5>
-                {% if person.team %}
-                <p class="text-muted small mb-2">{{ person.team.name }}</p>
+                {% if person.teams %}
+                <p class="text-muted small mb-2">{{ person.teams|map(attribute='name')|join(', ') }}</p>
                 {% endif %}
                 {% if person.email %}
                 <p class="text-muted small mb-2">{{ person.email }}</p>

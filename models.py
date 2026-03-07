@@ -15,6 +15,12 @@ task_tags = db.Table(
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
 )
 
+person_teams = db.Table(
+    'person_teams',
+    db.Column('person_id', db.Integer, db.ForeignKey('person.id'), primary_key=True),
+    db.Column('team_id', db.Integer, db.ForeignKey('team.id'), primary_key=True),
+)
+
 
 class Workspace(db.Model):
     id   = db.Column(db.Integer, primary_key=True)
@@ -26,14 +32,14 @@ class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     workspace_id = db.Column(db.Integer, db.ForeignKey('workspace.id'), nullable=False)
-    members = db.relationship('Person', backref='team', lazy=True)
+    members = db.relationship('Person', secondary='person_teams',
+                              backref=db.backref('teams', lazy=True))
 
 
 class Person(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120))
-    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
     workspace_id = db.Column(db.Integer, db.ForeignKey('workspace.id'), nullable=False)
     assignments = db.relationship('TaskAssignment', backref='person', lazy=True)
 

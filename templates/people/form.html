@@ -15,17 +15,19 @@
         <input type="email" class="form-control" id="email" name="email"
                value="{{ person.email if person else '' }}">
     </div>
+    {% if teams %}
     <div class="mb-3">
-        <label for="team_id" class="form-label">Team</label>
-        <select class="form-select" id="team_id" name="team_id">
-            <option value="">No team</option>
-            {% for team in teams %}
-            <option value="{{ team.id }}" {{ 'selected' if person and person.team_id == team.id else '' }}>
-                {{ team.name }}
-            </option>
-            {% endfor %}
-        </select>
+        <label class="form-label">Teams</label>
+        {% for team in teams %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="team_ids"
+                   value="{{ team.id }}" id="team-{{ team.id }}"
+                   {{ 'checked' if person and team in person.teams else '' }}>
+            <label class="form-check-label" for="team-{{ team.id }}">{{ team.name }}</label>
+        </div>
+        {% endfor %}
     </div>
+    {% endif %}
     <button type="submit" class="btn btn-primary">{{ 'Update' if person else 'Add' }} Person</button>
     {% if person %}
     <a href="{{ url_for('people.detail', id=person.id) }}" class="btn btn-outline-secondary">Cancel</a>

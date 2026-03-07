@@ -2,6 +2,13 @@ from flask import Blueprint, render_template, request, redirect, url_for, jsonif
 from models import db, Person, Team, StatusUpdate, Milestone, TaskAssignment, Workspace
 from datetime import date
 
+
+def _apply_teams(person):
+    """Sync person.teams based on submitted team_ids checkboxes."""
+    checked_ids = set(int(x) for x in request.form.getlist('team_ids'))
+    all_teams = Team.query.filter_by(workspace_id=person.workspace_id).all()
+    person.teams = [t for t in all_teams if t.id in checked_ids]
+
 bp = Blueprint('people', __name__)
 
 
@@ -29,10 +36,11 @@ def new_person():
         person = Person(
             name=request.form['name'],
             email=request.form.get('email', ''),
-            team_id=int(request.form['team_id']) if request.form.get('team_id') else None,
             workspace_id=g.workspace.id,
         )
         db.session.add(person)
+        db.session.flush()
+        _apply_teams(person)
         db.session.commit()
         return redirect(url_for('people.list_people'))
     teams = Team.query.filter_by(workspace_id=g.workspace.id).order_by(Team.name).all()
@@ -76,7 +84,7 @@ def edit_person(id):
     if request.method == 'POST':
         person.name = request.form['name']
         person.email = request.form.get('email', '')
-        person.team_id = int(request.form['team_id']) if request.form.get('team_id') else None
+        _apply_teams(person)
         db.session.commit()
         return redirect(url_for('people.detail', id=person.id))
     teams = Team.query.filter_by(workspace_id=g.workspace.id).order_by(Team.name).all()

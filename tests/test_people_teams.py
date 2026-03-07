@@ -38,11 +38,11 @@ class TestNewPerson:
         r = client.post(W + '/people/new', data={
             'name': 'Dave',
             'email': 'dave@example.com',
-            'team_id': str(team.id),
+            'team_ids': str(team.id),
         }, follow_redirects=True)
         assert r.status_code == 200
         person = Person.query.filter_by(name='Dave').first()
-        assert person.team_id == team.id
+        assert team in person.teams
 
 
 class TestPersonDetail:

@@ -98,7 +98,10 @@ def delete_project(id):
 
 @bp.route('/projects/dashboard-gantt-data')
 def dashboard_gantt_data():
-    active_projects = Project.query.filter_by(workspace_id=g.workspace.id, status='active').order_by(Project.name).all()
+    active_projects = Project.query.filter(
+        Project.workspace_id == g.workspace.id,
+        Project.status.in_(['active', 'completed', 'on_hold'])
+    ).order_by(Project.name).all()
     tasks = []
     legend = []
     for idx, project in enumerate(active_projects):

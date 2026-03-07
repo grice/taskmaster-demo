@@ -54,8 +54,11 @@ def make_team(name='Alpha Team'):
 
 def make_person(name='Alice', team=None):
     p = Person(name=name, email=f'{name.lower().replace(" ", ".")}@example.com',
-               team_id=team.id if team else None, workspace_id=_ws_id())
+               workspace_id=_ws_id())
     _db.session.add(p)
+    _db.session.flush()
+    if team:
+        team.members.append(p)
     _db.session.commit()
     return p
 

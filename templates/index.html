@@ -50,7 +50,7 @@
 
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Active Projects — Timeline</h5>
+        <h5 class="mb-0">Projects — Timeline</h5>
         <div class="d-flex gap-2 align-items-center flex-wrap">
             <div id="dg-legend" class="d-flex flex-wrap gap-1"></div>
             <div class="btn-group btn-group-sm" id="dg-zoom">
@@ -213,15 +213,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 svg.setAttribute('height', newH);
             }
 
+            // Frappe Gantt only renders today marker in Day mode; inject a line for other modes
+            function renderTodayHighlight() {
+                var svgEl = document.querySelector('#dashboard-gantt');
+                if (!svgEl) return;
+                svgEl.querySelectorAll('.today-line-injected').forEach(function(el) { el.remove(); });
+                if (gantt.view_is('Day')) return;
+                var today = new Date(); today.setHours(0, 0, 0, 0);
+                var diffHours = (today - gantt.gantt_start) / 3600000;
+                var x = (diffHours / gantt.options.step) * gantt.options.column_width;
+                var h = parseFloat(svgEl.getAttribute('height') || 0);
+                var gridLayer = svgEl.querySelector('g');
+                if (!gridLayer || !h) return;
+                var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', 0);
+                line.setAttribute('x2', x);
+                line.setAttribute('y2', h);
+                line.setAttribute('class', 'today-line today-line-injected');
+                gridLayer.appendChild(line);
+            }
+
             bindBars();
             trimGanttHeight();
+            renderTodayHighlight();
 
             document.querySelectorAll('#dg-zoom button').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     document.querySelector('#dg-zoom .active').classList.remove('active');
                     btn.classList.add('active');
                     gantt.change_view_mode(btn.getAttribute('data-mode'));
-                    setTimeout(function() { bindBars(); trimGanttHeight(); }, 100);
+                    setTimeout(function() { bindBars(); trimGanttHeight(); renderTodayHighlight(); }, 100);
                 });
             });
         });

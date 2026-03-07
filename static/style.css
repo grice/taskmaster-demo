@@ -55,6 +55,7 @@
 .badge-active { background-color: #198754; }
 .badge-completed { background-color: #6c757d; }
 .badge-on_hold { background-color: #fd7e14; }
+.badge-archived { background-color: #adb5bd; color: #212529; }
 
 /* Project status indicator (dot + text) */
 .project-status {
@@ -76,6 +77,8 @@
 .project-status.status-completed { color: #6c757d; }
 .project-status.status-on_hold .status-dot { background-color: #fd7e14; }
 .project-status.status-on_hold { color: #fd7e14; }
+.project-status.status-archived .status-dot { background-color: #adb5bd; }
+.project-status.status-archived { color: #adb5bd; }
 
 /* Gantt status coloring */
 .gantt .bar-wrapper.status-todo .bar,
@@ -215,6 +218,19 @@
     display: none !important;
 }
 
+/* Today highlight (Day mode — native Frappe rect) */
+.gantt .today-highlight {
+    fill: rgba(232, 144, 154, 0.2);
+    stroke: none;
+    opacity: 1;
+}
+
+/* Today line (Week/Month/Year — injected <line>) */
+.gantt .today-line {
+    stroke: #e8909a;
+    stroke-width: 2;
+}
+
 /* Dashboard Gantt — project color coding */
 .gantt .bar-wrapper.project-color-0 .bar, .gantt .bar-wrapper.project-color-0 .bar-progress { fill: #4e79a7; }
 .gantt .bar-wrapper.project-color-1 .bar, .gantt .bar-wrapper.project-color-1 .bar-progress { fill: #f28e2b; }
@@ -288,7 +304,7 @@
     stroke: #343a40;
 }
 [data-bs-theme="dark"] .gantt .today-highlight {
-    fill: rgba(56, 132, 255, 0.12);
+    fill: rgba(232, 144, 154, 0.15);
 }
 
 /* Gantt dark mode — text */

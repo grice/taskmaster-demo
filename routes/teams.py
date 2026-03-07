@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, g
-from models import db, Team, Workspace
+from models import db, Team, Person, Workspace
 
 bp = Blueprint('teams', __name__)
 
@@ -27,9 +27,12 @@ def new_team():
     if request.method == 'POST':
         team = Team(name=request.form['name'], workspace_id=g.workspace.id)
         db.session.add(team)
+        db.session.flush()
+        _apply_members(team)
         db.session.commit()
         return redirect(url_for('teams.list_teams'))
-    return render_template('teams/form.html', team=None)
+    people = Person.query.filter_by(workspace_id=g.workspace.id).order_by(Person.name).all()
+    return render_template('teams/form.html', team=None, people=people)
 
 
 @bp.route('/teams/<int:id>/edit', methods=['GET', 'POST'])
@@ -37,9 +40,18 @@ def edit_team(id):
     team = Team.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     if request.method == 'POST':
         team.name = request.form['name']
+        _apply_members(team)
         db.session.commit()
         return redirect(url_for('teams.list_teams'))
-    return render_template('teams/form.html', team=team)
+    people = Person.query.filter_by(workspace_id=g.workspace.id).order_by(Person.name).all()
+    return render_template('teams/form.html', team=team, people=people)
+
+
+def _apply_members(team):
+    """Sync team.members based on submitted member_ids checkboxes."""
+    checked_ids = set(int(x) for x in request.form.getlist('member_ids'))
+    all_people = Person.query.filter_by(workspace_id=team.workspace_id).all()
+    team.members = [p for p in all_people if p.id in checked_ids]
 
 
 @bp.route('/teams/<int:id>/delete', methods=['GET', 'POST'])

@@ -33,7 +33,7 @@
             <option value="">No lead</option>
             {% for person in people %}
             <option value="{{ person.id }}" {{ 'selected' if task and task.lead and task.lead.id == person.id else '' }}>
-                {{ person.name }}{% if person.team %} ({{ person.team.name }}){% endif %}
+                {{ person.name }}{% if person.teams %} ({{ person.teams|map(attribute='name')|join(', ') }}){% endif %}
             </option>
             {% endfor %}
         </select>
@@ -47,7 +47,7 @@
                    value="{{ person.id }}" id="member-{{ person.id }}"
                    {{ 'checked' if task and person in task.assignees else '' }}>
             <label class="form-check-label" for="member-{{ person.id }}">
-                {{ person.name }}{% if person.team %} ({{ person.team.name }}){% endif %}
+                {{ person.name }}{% if person.teams %} ({{ person.teams|map(attribute='name')|join(', ') }}){% endif %}
             </label>
         </div>
         {% endfor %}
