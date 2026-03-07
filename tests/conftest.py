@@ -4,7 +4,10 @@ from sqlalchemy.pool import StaticPool
 
 from app import create_app
 from models import (db as _db, Team, Person, Project, Task,
-                    TaskAssignment, Milestone, StatusUpdate, Tag)
+                    TaskAssignment, Milestone, StatusUpdate, Tag, Workspace)
+
+WS_SLUG = 'test'
+W = f'/w/{WS_SLUG}'
 
 
 @pytest.fixture(scope='session')
@@ -23,6 +26,9 @@ def app():
 def db(app):
     with app.app_context():
         _db.create_all()
+        ws = Workspace(name='Test', slug=WS_SLUG)
+        _db.session.add(ws)
+        _db.session.commit()
         yield _db
         _db.session.remove()
         _db.drop_all()
@@ -35,8 +41,12 @@ def client(app, db):
 
 # ── Data helpers ──────────────────────────────────────────────────────────────
 
+def _ws_id():
+    return Workspace.query.filter_by(slug=WS_SLUG).first().id
+
+
 def make_team(name='Alpha Team'):
-    t = Team(name=name)
+    t = Team(name=name, workspace_id=_ws_id())
     _db.session.add(t)
     _db.session.commit()
     return t
@@ -44,7 +54,7 @@ def make_team(name='Alpha Team'):
 
 def make_person(name='Alice', team=None):
     p = Person(name=name, email=f'{name.lower().replace(" ", ".")}@example.com',
-               team_id=team.id if team else None)
+               team_id=team.id if team else None, workspace_id=_ws_id())
     _db.session.add(p)
     _db.session.commit()
     return p
@@ -53,7 +63,7 @@ def make_person(name='Alice', team=None):
 def make_project(name='Test Project', status='active',
                  start=date(2025, 1, 1), end=date(2025, 12, 31)):
     p = Project(name=name, status=status, start_date=start, end_date=end,
-                description='A test project')
+                description='A test project', workspace_id=_ws_id())
     _db.session.add(p)
     _db.session.commit()
     return p
@@ -62,7 +72,8 @@ def make_project(name='Test Project', status='active',
 def make_task(project, title='Test Task', status='todo', priority='medium',
               start=date(2025, 1, 1), end=date(2025, 6, 30)):
     t = Task(title=title, project_id=project.id, status=status,
-             priority=priority, start_date=start, end_date=end)
+             priority=priority, start_date=start, end_date=end,
+             workspace_id=_ws_id())
     _db.session.add(t)
     _db.session.commit()
     return t
