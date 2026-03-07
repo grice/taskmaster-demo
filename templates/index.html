@@ -202,14 +202,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
 
+            function trimGanttHeight() {
+                var svg = document.querySelector('#dashboard-gantt');
+                if (!svg) return;
+                var rows = svg.querySelectorAll('.grid-row');
+                if (!rows.length) return;
+                var last = rows[rows.length - 1];
+                var newH = parseFloat(last.getAttribute('y') || 0) + parseFloat(last.getAttribute('height') || 0) + 4;
+                svg.setAttribute('height', newH);
+            }
+
             bindBars();
+            trimGanttHeight();
 
             document.querySelectorAll('#dg-zoom button').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     document.querySelector('#dg-zoom .active').classList.remove('active');
                     btn.classList.add('active');
                     gantt.change_view_mode(btn.getAttribute('data-mode'));
-                    setTimeout(bindBars, 100);
+                    setTimeout(function() { bindBars(); trimGanttHeight(); }, 100);
                 });
             });
         });

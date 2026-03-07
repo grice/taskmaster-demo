@@ -169,6 +169,9 @@
     overflow-x: auto;
     margin: 1rem 0;
 }
+.card-body.gantt-container {
+    padding: 0.25rem 0;
+}
 
 /* @mention tags */
 .mention-tag {
