@@ -91,15 +91,6 @@
     fill: #198754;
 }
 
-/* Gantt priority accents */
-.gantt .bar-wrapper.priority-critical .bar {
-    stroke: #dc3545;
-    stroke-width: 2;
-}
-.gantt .bar-wrapper.priority-high .bar {
-    stroke: #fd7e14;
-    stroke-width: 2;
-}
 
 /* Workload bars */
 .workload-bar {
@@ -339,15 +330,6 @@
     fill: #adb5bd;
 }
 
-/* Gantt dark mode — priority accents (brighter strokes) */
-[data-bs-theme="dark"] .gantt .bar-wrapper.priority-critical .bar {
-    stroke: #ff6b7a;
-    stroke-width: 2;
-}
-[data-bs-theme="dark"] .gantt .bar-wrapper.priority-high .bar {
-    stroke: #ffb347;
-    stroke-width: 2;
-}
 
 /* Dark mode project color overrides (needed to beat attr-selector specificity) */
 [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-0 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-0 .bar-progress { fill: #4e79a7; }

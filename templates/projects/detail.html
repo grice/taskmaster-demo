@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         var rect = bar.getBoundingClientRect();
                         tooltip.style.top = (rect.bottom + 8) + 'px';
-                        tooltip.style.left = Math.min(rect.left, window.innerWidth - 380) + 'px';
+                        tooltip.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 380)) + 'px';
                         tooltip.style.display = 'block';
                     });
 
@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             document.getElementById('tooltip-assignees').textContent = data.name;
                             var bRect = diamond.getBoundingClientRect();
                             tooltip.style.top = (bRect.bottom + 8) + 'px';
-                            tooltip.style.left = Math.min(bRect.left - 160, window.innerWidth - 380) + 'px';
+                            tooltip.style.left = Math.max(8, Math.min(bRect.left - 160, window.innerWidth - 380)) + 'px';
                             tooltip.style.display = 'block';
                         });
                         diamond.addEventListener('mouseleave', function() {

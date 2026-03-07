@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('dg-dates').textContent = t.start + ' \u2192 ' + t.end;
                         var rect = bar.getBoundingClientRect();
                         tooltip.style.top = (rect.bottom + 8) + 'px';
-                        tooltip.style.left = Math.min(rect.left, window.innerWidth - 260) + 'px';
+                        tooltip.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 260)) + 'px';
                         tooltip.style.display = 'block';
                     });
 
