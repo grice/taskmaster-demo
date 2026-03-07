@@ -78,25 +78,25 @@
 .project-status.status-on_hold { color: #fd7e14; }
 
 /* Gantt status coloring */
-.gantt .bar.status-todo .bar-progress,
-.gantt .bar.status-todo .bar-wrapper .bar {
+.gantt .bar-wrapper.status-todo .bar,
+.gantt .bar-wrapper.status-todo .bar-progress {
     fill: #adb5bd;
 }
-.gantt .bar.status-in_progress .bar-progress,
-.gantt .bar.status-in_progress .bar-wrapper .bar {
+.gantt .bar-wrapper.status-in_progress .bar,
+.gantt .bar-wrapper.status-in_progress .bar-progress {
     fill: #0d6efd;
 }
-.gantt .bar.status-done .bar-progress,
-.gantt .bar.status-done .bar-wrapper .bar {
+.gantt .bar-wrapper.status-done .bar,
+.gantt .bar-wrapper.status-done .bar-progress {
     fill: #198754;
 }
 
 /* Gantt priority accents */
-.gantt .bar.priority-critical .bar-wrapper .bar {
+.gantt .bar-wrapper.priority-critical .bar {
     stroke: #dc3545;
     stroke-width: 2;
 }
-.gantt .bar.priority-high .bar-wrapper .bar {
+.gantt .bar-wrapper.priority-high .bar {
     stroke: #fd7e14;
     stroke-width: 2;
 }
@@ -222,16 +222,16 @@
 }
 
 /* Dashboard Gantt — project color coding */
-.gantt .bar.project-color-0 .bar-wrapper .bar, .gantt .bar.project-color-0 .bar-progress { fill: #4e79a7; }
-.gantt .bar.project-color-1 .bar-wrapper .bar, .gantt .bar.project-color-1 .bar-progress { fill: #f28e2b; }
-.gantt .bar.project-color-2 .bar-wrapper .bar, .gantt .bar.project-color-2 .bar-progress { fill: #e15759; }
-.gantt .bar.project-color-3 .bar-wrapper .bar, .gantt .bar.project-color-3 .bar-progress { fill: #76b7b2; }
-.gantt .bar.project-color-4 .bar-wrapper .bar, .gantt .bar.project-color-4 .bar-progress { fill: #59a14f; }
-.gantt .bar.project-color-5 .bar-wrapper .bar, .gantt .bar.project-color-5 .bar-progress { fill: #edc948; }
-.gantt .bar.project-color-6 .bar-wrapper .bar, .gantt .bar.project-color-6 .bar-progress { fill: #b07aa1; }
-.gantt .bar.project-color-7 .bar-wrapper .bar, .gantt .bar.project-color-7 .bar-progress { fill: #ff9da7; }
-.gantt .bar.project-color-8 .bar-wrapper .bar, .gantt .bar.project-color-8 .bar-progress { fill: #9c755f; }
-.gantt .bar.project-color-9 .bar-wrapper .bar, .gantt .bar.project-color-9 .bar-progress { fill: #bab0ac; }
+.gantt .bar-wrapper.project-color-0 .bar, .gantt .bar-wrapper.project-color-0 .bar-progress { fill: #4e79a7; }
+.gantt .bar-wrapper.project-color-1 .bar, .gantt .bar-wrapper.project-color-1 .bar-progress { fill: #f28e2b; }
+.gantt .bar-wrapper.project-color-2 .bar, .gantt .bar-wrapper.project-color-2 .bar-progress { fill: #e15759; }
+.gantt .bar-wrapper.project-color-3 .bar, .gantt .bar-wrapper.project-color-3 .bar-progress { fill: #76b7b2; }
+.gantt .bar-wrapper.project-color-4 .bar, .gantt .bar-wrapper.project-color-4 .bar-progress { fill: #59a14f; }
+.gantt .bar-wrapper.project-color-5 .bar, .gantt .bar-wrapper.project-color-5 .bar-progress { fill: #edc948; }
+.gantt .bar-wrapper.project-color-6 .bar, .gantt .bar-wrapper.project-color-6 .bar-progress { fill: #b07aa1; }
+.gantt .bar-wrapper.project-color-7 .bar, .gantt .bar-wrapper.project-color-7 .bar-progress { fill: #ff9da7; }
+.gantt .bar-wrapper.project-color-8 .bar, .gantt .bar-wrapper.project-color-8 .bar-progress { fill: #9c755f; }
+.gantt .bar-wrapper.project-color-9 .bar, .gantt .bar-wrapper.project-color-9 .bar-progress { fill: #bab0ac; }
 
 /* ---- Dark theme overrides ---- */
 [data-bs-theme="dark"] body {
@@ -307,16 +307,16 @@
 }
 
 /* Gantt dark mode — bars (brighter for contrast on dark bg) */
-[data-bs-theme="dark"] .gantt .bar.status-todo .bar-progress,
-[data-bs-theme="dark"] .gantt .bar.status-todo .bar-wrapper .bar {
+[data-bs-theme="dark"] .gantt .bar-wrapper.status-todo .bar,
+[data-bs-theme="dark"] .gantt .bar-wrapper.status-todo .bar-progress {
     fill: #6c757d;
 }
-[data-bs-theme="dark"] .gantt .bar.status-in_progress .bar-progress,
-[data-bs-theme="dark"] .gantt .bar.status-in_progress .bar-wrapper .bar {
+[data-bs-theme="dark"] .gantt .bar-wrapper.status-in_progress .bar,
+[data-bs-theme="dark"] .gantt .bar-wrapper.status-in_progress .bar-progress {
     fill: #3d8bfd;
 }
-[data-bs-theme="dark"] .gantt .bar.status-done .bar-progress,
-[data-bs-theme="dark"] .gantt .bar.status-done .bar-wrapper .bar {
+[data-bs-theme="dark"] .gantt .bar-wrapper.status-done .bar,
+[data-bs-theme="dark"] .gantt .bar-wrapper.status-done .bar-progress {
     fill: #20c997;
 }
 
@@ -340,26 +340,26 @@
 }
 
 /* Gantt dark mode — priority accents (brighter strokes) */
-[data-bs-theme="dark"] .gantt .bar.priority-critical .bar-wrapper .bar {
+[data-bs-theme="dark"] .gantt .bar-wrapper.priority-critical .bar {
     stroke: #ff6b7a;
     stroke-width: 2;
 }
-[data-bs-theme="dark"] .gantt .bar.priority-high .bar-wrapper .bar {
+[data-bs-theme="dark"] .gantt .bar-wrapper.priority-high .bar {
     stroke: #ffb347;
     stroke-width: 2;
 }
 
 /* Dark mode project color overrides (needed to beat attr-selector specificity) */
-[data-bs-theme="dark"] .gantt .bar.project-color-0 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-0 .bar-progress { fill: #4e79a7; }
-[data-bs-theme="dark"] .gantt .bar.project-color-1 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-1 .bar-progress { fill: #f28e2b; }
-[data-bs-theme="dark"] .gantt .bar.project-color-2 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-2 .bar-progress { fill: #e15759; }
-[data-bs-theme="dark"] .gantt .bar.project-color-3 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-3 .bar-progress { fill: #76b7b2; }
-[data-bs-theme="dark"] .gantt .bar.project-color-4 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-4 .bar-progress { fill: #59a14f; }
-[data-bs-theme="dark"] .gantt .bar.project-color-5 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-5 .bar-progress { fill: #edc948; }
-[data-bs-theme="dark"] .gantt .bar.project-color-6 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-6 .bar-progress { fill: #b07aa1; }
-[data-bs-theme="dark"] .gantt .bar.project-color-7 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-7 .bar-progress { fill: #ff9da7; }
-[data-bs-theme="dark"] .gantt .bar.project-color-8 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-8 .bar-progress { fill: #9c755f; }
-[data-bs-theme="dark"] .gantt .bar.project-color-9 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-9 .bar-progress { fill: #bab0ac; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-0 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-0 .bar-progress { fill: #4e79a7; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-1 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-1 .bar-progress { fill: #f28e2b; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-2 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-2 .bar-progress { fill: #e15759; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-3 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-3 .bar-progress { fill: #76b7b2; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-4 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-4 .bar-progress { fill: #59a14f; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-5 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-5 .bar-progress { fill: #edc948; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-6 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-6 .bar-progress { fill: #b07aa1; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-7 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-7 .bar-progress { fill: #ff9da7; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-8 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-8 .bar-progress { fill: #9c755f; }
+[data-bs-theme="dark"] .gantt .bar-wrapper.project-color-9 .bar, [data-bs-theme="dark"] .gantt .bar-wrapper.project-color-9 .bar-progress { fill: #bab0ac; }
 
 /* Gantt dark mode — milestone diamond stroke */
 [data-bs-theme="dark"] .gantt-milestone {
