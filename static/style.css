@@ -221,6 +221,18 @@
     display: none !important;
 }
 
+/* Dashboard Gantt — project color coding */
+.gantt .bar.project-color-0 .bar-wrapper .bar, .gantt .bar.project-color-0 .bar-progress { fill: #4e79a7; }
+.gantt .bar.project-color-1 .bar-wrapper .bar, .gantt .bar.project-color-1 .bar-progress { fill: #f28e2b; }
+.gantt .bar.project-color-2 .bar-wrapper .bar, .gantt .bar.project-color-2 .bar-progress { fill: #e15759; }
+.gantt .bar.project-color-3 .bar-wrapper .bar, .gantt .bar.project-color-3 .bar-progress { fill: #76b7b2; }
+.gantt .bar.project-color-4 .bar-wrapper .bar, .gantt .bar.project-color-4 .bar-progress { fill: #59a14f; }
+.gantt .bar.project-color-5 .bar-wrapper .bar, .gantt .bar.project-color-5 .bar-progress { fill: #edc948; }
+.gantt .bar.project-color-6 .bar-wrapper .bar, .gantt .bar.project-color-6 .bar-progress { fill: #b07aa1; }
+.gantt .bar.project-color-7 .bar-wrapper .bar, .gantt .bar.project-color-7 .bar-progress { fill: #ff9da7; }
+.gantt .bar.project-color-8 .bar-wrapper .bar, .gantt .bar.project-color-8 .bar-progress { fill: #9c755f; }
+.gantt .bar.project-color-9 .bar-wrapper .bar, .gantt .bar.project-color-9 .bar-progress { fill: #bab0ac; }
+
 /* ---- Dark theme overrides ---- */
 [data-bs-theme="dark"] body {
     color-scheme: dark;
@@ -336,6 +348,18 @@
     stroke: #ffb347;
     stroke-width: 2;
 }
+
+/* Dark mode project color overrides (needed to beat attr-selector specificity) */
+[data-bs-theme="dark"] .gantt .bar.project-color-0 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-0 .bar-progress { fill: #4e79a7; }
+[data-bs-theme="dark"] .gantt .bar.project-color-1 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-1 .bar-progress { fill: #f28e2b; }
+[data-bs-theme="dark"] .gantt .bar.project-color-2 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-2 .bar-progress { fill: #e15759; }
+[data-bs-theme="dark"] .gantt .bar.project-color-3 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-3 .bar-progress { fill: #76b7b2; }
+[data-bs-theme="dark"] .gantt .bar.project-color-4 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-4 .bar-progress { fill: #59a14f; }
+[data-bs-theme="dark"] .gantt .bar.project-color-5 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-5 .bar-progress { fill: #edc948; }
+[data-bs-theme="dark"] .gantt .bar.project-color-6 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-6 .bar-progress { fill: #b07aa1; }
+[data-bs-theme="dark"] .gantt .bar.project-color-7 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-7 .bar-progress { fill: #ff9da7; }
+[data-bs-theme="dark"] .gantt .bar.project-color-8 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-8 .bar-progress { fill: #9c755f; }
+[data-bs-theme="dark"] .gantt .bar.project-color-9 .bar-wrapper .bar, [data-bs-theme="dark"] .gantt .bar.project-color-9 .bar-progress { fill: #bab0ac; }
 
 /* Gantt dark mode — milestone diamond stroke */
 [data-bs-theme="dark"] .gantt-milestone {

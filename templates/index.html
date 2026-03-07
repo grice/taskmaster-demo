@@ -39,6 +39,31 @@
     </div>
 </div>
 
+<!-- Hover tooltip for dashboard Gantt -->
+<div id="dg-tooltip" class="card shadow-sm" style="display:none; position:fixed; z-index:1060; width:240px; pointer-events:none;">
+    <div class="card-body py-2 px-3">
+        <div class="fw-semibold small" id="dg-title"></div>
+        <div class="small text-muted" id="dg-project"></div>
+        <div class="small text-muted mt-1" id="dg-dates"></div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Active Projects — Timeline</h5>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <div id="dg-legend" class="d-flex flex-wrap gap-1"></div>
+            <div class="btn-group btn-group-sm" id="dg-zoom">
+                <button type="button" class="btn btn-outline-secondary" data-mode="Week">Week</button>
+                <button type="button" class="btn btn-outline-secondary active" data-mode="Month">Month</button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body gantt-container" id="dg-wrapper">
+        <svg id="dashboard-gantt"></svg>
+    </div>
+</div>
+
 <div class="row g-4">
     <div class="col-md-8">
         <div class="card">
@@ -109,4 +134,85 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltip = document.getElementById('dg-tooltip');
+
+    fetch('/projects/dashboard-gantt-data')
+        .then(r => r.json())
+        .then(function(data) {
+            // Empty state
+            if (data.tasks.length === 0) {
+                document.getElementById('dg-wrapper').innerHTML =
+                    '<p class="text-muted mb-0 small py-2 text-center">No active tasks to display.</p>';
+                return;
+            }
+
+            // Build legend
+            var legend = document.getElementById('dg-legend');
+            data.legend.forEach(function(proj) {
+                var a = document.createElement('a');
+                a.href = '/projects/' + proj.id;
+                a.className = 'badge text-decoration-none';
+                a.style.backgroundColor = proj.color;
+                a.style.color = '#fff';
+                a.textContent = proj.name;
+                legend.appendChild(a);
+            });
+
+            // Build task lookup
+            var taskMap = {};
+            data.tasks.forEach(function(t) { taskMap[t.id] = t; });
+
+            var gantt = new Gantt('#dashboard-gantt', data.tasks, {
+                view_mode: 'Month',
+                date_format: 'YYYY-MM-DD',
+                custom_popup_html: function() { return ''; },
+                on_date_change: function() {},
+                on_progress_change: function() {},
+            });
+
+            function bindBars() {
+                document.querySelectorAll('#dashboard-gantt .bar-wrapper').forEach(function(bar) {
+                    bar.style.cursor = 'pointer';
+
+                    bar.addEventListener('click', function() {
+                        var t = taskMap[bar.getAttribute('data-id')];
+                        if (t) window.location.href = '/projects/' + t.project_id;
+                    });
+
+                    bar.addEventListener('mouseenter', function() {
+                        var t = taskMap[bar.getAttribute('data-id')];
+                        if (!t) return;
+                        document.getElementById('dg-title').textContent = t.name;
+                        document.getElementById('dg-project').textContent = t.project_name;
+                        document.getElementById('dg-dates').textContent = t.start + ' \u2192 ' + t.end;
+                        var rect = bar.getBoundingClientRect();
+                        tooltip.style.top = (rect.bottom + 8) + 'px';
+                        tooltip.style.left = Math.min(rect.left, window.innerWidth - 260) + 'px';
+                        tooltip.style.display = 'block';
+                    });
+
+                    bar.addEventListener('mouseleave', function() {
+                        tooltip.style.display = 'none';
+                    });
+                });
+            }
+
+            bindBars();
+
+            document.querySelectorAll('#dg-zoom button').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.querySelector('#dg-zoom .active').classList.remove('active');
+                    btn.classList.add('active');
+                    gantt.change_view_mode(btn.getAttribute('data-mode'));
+                    setTimeout(bindBars, 100);
+                });
+            });
+        });
+});
+</script>
 {% endblock %}

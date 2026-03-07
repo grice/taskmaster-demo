@@ -5,6 +5,11 @@ from datetime import date
 
 bp = Blueprint('projects', __name__)
 
+PROJECT_COLORS = [
+    '#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f',
+    '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac',
+]
+
 
 @bp.route('/projects')
 def list_projects():
@@ -76,6 +81,29 @@ def delete_project(id):
                            title='Delete Project',
                            message=f'Are you sure you want to delete project "{project.name}" and all its tasks? This cannot be undone.',
                            cancel_url=url_for('projects.detail', id=project.id))
+
+
+@bp.route('/projects/dashboard-gantt-data')
+def dashboard_gantt_data():
+    active_projects = Project.query.filter_by(status='active').order_by(Project.name).all()
+    tasks = []
+    legend = []
+    for idx, project in enumerate(active_projects):
+        color = PROJECT_COLORS[idx % len(PROJECT_COLORS)]
+        legend.append({'name': project.name, 'color': color, 'id': project.id})
+        for task in project.tasks:
+            tasks.append({
+                'id': f'task-{task.id}',
+                'name': task.title,
+                'start': task.start_date.isoformat(),
+                'end': task.end_date.isoformat(),
+                'progress': task.progress,
+                'dependencies': ','.join(f'task-{d.id}' for d in task.dependencies),
+                'custom_class': f'project-color-{idx % len(PROJECT_COLORS)}',
+                'project_name': project.name,
+                'project_id': project.id,
+            })
+    return jsonify({'tasks': tasks, 'legend': legend})
 
 
 @bp.route('/projects/<int:id>/export/excel')
