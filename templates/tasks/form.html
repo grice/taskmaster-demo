@@ -70,7 +70,7 @@
         <div class="col-md-6 mb-3">
             <label for="status" class="form-label">Status</label>
             <select class="form-select" id="status" name="status">
-                {% for s in ['todo', 'in_progress', 'done'] %}
+                {% for s in ['todo', 'in_progress', 'on_hold', 'done'] %}
                 <option value="{{ s }}" {{ 'selected' if task and task.status == s else '' }}>
                     {{ s | replace('_', ' ') | title }}
                 </option>

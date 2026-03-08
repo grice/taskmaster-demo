@@ -8,6 +8,7 @@
             {% if overdue %}Overdue Tasks
             {% elif status_filter == 'in_progress' %}In Progress Tasks
             {% elif status_filter == 'todo' %}Todo Tasks
+            {% elif status_filter == 'on_hold' %}On Hold Tasks
             {% elif status_filter == 'done' %}Completed Tasks
             {% else %}All Tasks
             {% endif %}

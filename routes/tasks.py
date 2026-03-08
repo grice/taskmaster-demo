@@ -195,7 +195,7 @@ def quick_update(id):
         task.start_date = date.fromisoformat(data['start_date'])
     if 'end_date' in data:
         task.end_date = date.fromisoformat(data['end_date'])
-    if 'status' in data and data['status'] in ('todo', 'in_progress', 'done'):
+    if 'status' in data and data['status'] in ('todo', 'in_progress', 'on_hold', 'done'):
         task.status = data['status']
     db.session.commit()
     return jsonify({'ok': True, 'progress': task.progress})

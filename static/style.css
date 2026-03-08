@@ -93,6 +93,10 @@
 .gantt .bar-wrapper.status-done .bar-progress {
     fill: #198754;
 }
+.gantt .bar-wrapper.status-on_hold .bar,
+.gantt .bar-wrapper.status-on_hold .bar-progress {
+    fill: #fd7e14;
+}
 
 
 /* Workload bars */
@@ -328,6 +332,10 @@
 [data-bs-theme="dark"] .gantt .bar-wrapper.status-done .bar,
 [data-bs-theme="dark"] .gantt .bar-wrapper.status-done .bar-progress {
     fill: #20c997;
+}
+[data-bs-theme="dark"] .gantt .bar-wrapper.status-on_hold .bar,
+[data-bs-theme="dark"] .gantt .bar-wrapper.status-on_hold .bar-progress {
+    fill: #fd7e14;
 }
 
 /* Gantt dark mode — default bar (no status class) */

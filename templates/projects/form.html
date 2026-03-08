@@ -31,7 +31,7 @@
         <select class="form-select" id="status" name="status">
             {% for s in ['active', 'completed', 'on_hold', 'archived'] %}
             <option value="{{ s }}" {{ 'selected' if project and project.status == s else '' }}>
-                {{ s | replace('_', ' ') | title }}
+                {{ '(Archived)' if s == 'archived' else s | replace('_', ' ') | title }}
             </option>
             {% endfor %}
         </select>

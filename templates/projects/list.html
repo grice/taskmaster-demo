@@ -20,7 +20,7 @@
                         </a>
                     </h5>
                     <span class="project-status status-{{ project.status }}">
-                        <span class="status-dot"></span>{{ project.status | replace('_', ' ') | title }}
+                        <span class="status-dot"></span>{{ '(Archived)' if project.status == 'archived' else project.status | replace('_', ' ') | title }}
                     </span>
                 </div>
                 {% if project.description %}
