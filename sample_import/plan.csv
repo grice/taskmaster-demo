@@ -1,0 +1,12 @@
+type,name,description,start_date,end_date,status,priority,assignees,tags,depends_on
+project,Website Redesign,Complete overhaul of company website with new branding,2026-01-05,2026-05-30,active,,,,
+task,Discovery & Wireframes,Stakeholder interviews and initial wireframes,2026-01-05,2026-01-20,done,high,*Alice Smith,design,
+task,Visual Design,High-fidelity mockups and design system,2026-01-20,2026-02-14,done,high,*Alice Smith,design,Discovery & Wireframes
+task,Frontend Build,Implement React components from approved designs,2026-02-14,2026-04-01,in_progress,high,"Alice Smith,Bob Jones","dev,frontend",Visual Design
+task,CMS Integration,Connect headless CMS and populate content,2026-03-01,2026-04-15,todo,medium,*Carol White,"dev,content",Frontend Build
+task,QA & Launch,Testing and production deployment,2026-04-15,2026-05-30,todo,high,"Bob Jones,Carol White",dev,"Frontend Build,CMS Integration"
+project,Data Platform Migration,Migrate analytics pipeline to new cloud infrastructure,2026-02-01,2026-06-30,active,,,,
+task,Audit Existing Pipeline,Document current data flows and pain points,2026-02-01,2026-02-15,done,medium,*Bob Jones,data,
+task,Schema Design,Design new data models and warehouse structure,2026-02-15,2026-03-15,in_progress,high,*Bob Jones,data,Audit Existing Pipeline
+task,Pipeline Build,Implement ETL jobs and data transforms,2026-03-15,2026-05-15,todo,high,"Bob Jones,Dana Lee","dev,data",Schema Design
+task,Validation & Cutover,Data quality checks and traffic switchover,2026-05-15,2026-06-30,todo,critical,*Dana Lee,data,Pipeline Build

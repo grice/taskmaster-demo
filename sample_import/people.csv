@@ -1,0 +1,8 @@
+type,name,email,teams
+team,Design,,
+team,Engineering,,
+team,Content,,
+person,Alice Smith,alice@example.com,Design
+person,Bob Jones,bob@example.com,Engineering
+person,Carol White,carol@example.com,"Design,Content"
+person,Dana Lee,dana@example.com,Engineering
