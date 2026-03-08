@@ -9,19 +9,20 @@ import os
 import sys
 from datetime import date, datetime
 from app import create_app
-from models import (db, Team, Person, Project, Task, TaskAssignment,
+from models import (db, Workspace, Team, Person, Project, Task, TaskAssignment,
                     TaskDependency, Tag, Milestone, StatusUpdate, task_tags,
-                    status_update_mentions)
+                    person_teams, status_update_mentions)
 
 app = create_app()
 
 # Table export order (respects foreign key dependencies)
 TABLES = [
-    ('teams.csv', Team, ['id', 'name']),
-    ('people.csv', Person, ['id', 'name', 'email', 'team_id']),
-    ('projects.csv', Project, ['id', 'name', 'description', 'start_date', 'end_date', 'status']),
-    ('tags.csv', Tag, ['id', 'name']),
-    ('tasks.csv', Task, ['id', 'title', 'description', 'project_id', 'start_date', 'end_date', 'status', 'priority']),
+    ('workspaces.csv', Workspace, ['id', 'name', 'slug']),
+    ('teams.csv', Team, ['id', 'name', 'workspace_id']),
+    ('people.csv', Person, ['id', 'name', 'email', 'workspace_id']),
+    ('projects.csv', Project, ['id', 'name', 'description', 'start_date', 'end_date', 'status', 'workspace_id']),
+    ('tags.csv', Tag, ['id', 'name', 'workspace_id']),
+    ('tasks.csv', Task, ['id', 'title', 'description', 'project_id', 'start_date', 'end_date', 'status', 'priority', 'workspace_id']),
     ('task_assignments.csv', TaskAssignment, ['id', 'task_id', 'person_id', 'is_lead']),
     ('task_dependencies.csv', TaskDependency, ['id', 'task_id', 'depends_on_id']),
     ('milestones.csv', Milestone, ['id', 'task_id', 'name', 'date', 'status_override']),
@@ -31,6 +32,7 @@ TABLES = [
 # Many-to-many association tables
 ASSOC_TABLES = [
     ('task_tags.csv', task_tags, ['task_id', 'tag_id']),
+    ('person_teams.csv', person_teams, ['person_id', 'team_id']),
     ('status_update_mentions.csv', status_update_mentions, ['status_update_id', 'person_id']),
 ]
 
