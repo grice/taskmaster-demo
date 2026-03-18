@@ -15,6 +15,8 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///taskmaster.db'
     app.config['SECRET_KEY'] = 'dev-secret-key'
+    app.config['BRAND_NAME'] = 'Tideline'
+    app.config['BRAND_TAGLINE'] = 'Chart work across teams.'
 
     if test_config:
         app.config.update(test_config)
@@ -26,6 +28,13 @@ def create_app(test_config=None):
         db.create_all()
 
     register_blueprints(app)
+
+    @app.context_processor
+    def inject_branding():
+        return {
+            'brand_name': app.config['BRAND_NAME'],
+            'brand_tagline': app.config['BRAND_TAGLINE'],
+        }
 
     @app.after_request
     def add_no_cache_headers(response):

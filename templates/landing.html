@@ -1,13 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Taskmaster — Workspaces{% endblock %}
+{% block title %}{{ brand_name }} — Workspaces{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="mb-0">Workspaces</h1>
-    <a href="{{ url_for('workspaces.new_workspace') }}" class="btn btn-primary">New Workspace</a>
-</div>
+<section class="landing-hero mb-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <p class="landing-kicker mb-2">{{ brand_name }}</p>
+            <h1 class="mb-2">Workspaces</h1>
+            <p class="landing-tagline mb-0">{{ brand_tagline }}</p>
+        </div>
+        <a href="{{ url_for('workspaces.new_workspace') }}" class="btn btn-primary">New Workspace</a>
+    </div>
+</section>
 
 {% if workspaces %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <p class="text-muted mb-0">Choose a workspace to review projects, people, and timelines.</p>
+</div>
 <div class="row g-3">
     {% for ws in workspaces %}
     <div class="col-md-4">
@@ -23,8 +32,8 @@
     {% endfor %}
 </div>
 {% else %}
-<div class="text-center py-5">
-    <p class="text-muted">No workspaces yet.</p>
+<div class="text-center py-5 landing-empty-state">
+    <p class="text-muted">No workspaces yet in {{ brand_name }}.</p>
     <a href="{{ url_for('workspaces.new_workspace') }}" class="btn btn-primary">Create your first workspace</a>
 </div>
 {% endif %}

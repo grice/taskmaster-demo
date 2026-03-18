@@ -1,3 +1,54 @@
+/* Brand */
+.brand-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.brand-mark {
+    width: 1.85rem;
+    height: 1.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+    background: linear-gradient(135deg, #0d6efd 0%, #0f766e 100%);
+    color: #f8fafc;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 18px rgba(13, 110, 253, 0.2);
+}
+
+.landing-hero {
+    padding: 1.5rem 1.5rem 1.25rem;
+    border: 1px solid rgba(13, 110, 253, 0.12);
+    border-radius: 1.25rem;
+    background:
+        radial-gradient(circle at top right, rgba(103, 232, 249, 0.18), transparent 32%),
+        linear-gradient(135deg, rgba(8, 47, 73, 0.04), rgba(13, 110, 253, 0.07));
+}
+
+.landing-kicker {
+    color: #0f766e;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.landing-tagline {
+    max-width: 34rem;
+    color: #5c6b7a;
+    font-size: 1.05rem;
+}
+
+.landing-empty-state {
+    border: 1px dashed rgba(13, 110, 253, 0.2);
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(13, 110, 253, 0.03), rgba(15, 118, 110, 0.04));
+}
+
 /* Milestone status badges */
 .milestone-on_track { background-color: #198754; color: white; }
 .milestone-delayed { background-color: #dc3545; color: white; }
@@ -250,6 +301,30 @@
 /* ---- Dark theme overrides ---- */
 [data-bs-theme="dark"] body {
     color-scheme: dark;
+}
+
+[data-bs-theme="dark"] .brand-mark {
+    box-shadow: 0 8px 18px rgba(103, 232, 249, 0.14);
+}
+
+[data-bs-theme="dark"] .landing-hero {
+    border-color: rgba(103, 232, 249, 0.14);
+    background:
+        radial-gradient(circle at top right, rgba(103, 232, 249, 0.12), transparent 32%),
+        linear-gradient(135deg, rgba(8, 47, 73, 0.55), rgba(15, 23, 42, 0.72));
+}
+
+[data-bs-theme="dark"] .landing-kicker {
+    color: #67e8f9;
+}
+
+[data-bs-theme="dark"] .landing-tagline {
+    color: #b6c2cf;
+}
+
+[data-bs-theme="dark"] .landing-empty-state {
+    border-color: rgba(103, 232, 249, 0.16);
+    background: linear-gradient(180deg, rgba(8, 47, 73, 0.35), rgba(15, 23, 42, 0.48));
 }
 
 [data-bs-theme="dark"] .workload-bar {

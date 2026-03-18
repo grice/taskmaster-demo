@@ -1,4 +1,4 @@
-"""Export and import the Taskmaster database to/from CSV files.
+"""Export and import the Tideline database to/from CSV files.
 
 Usage:
     python dbutil.py export [output_dir]   # default: ./export

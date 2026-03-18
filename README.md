@@ -1,6 +1,6 @@
-# Taskmaster
+# Tideline
 
-A Flask app for tracking projects across teams. Supports multiple isolated workspaces, interactive Gantt charts, people workload views, milestones, @mention status updates, and more.
+A Flask app for tracking projects across teams. Tideline supports multiple isolated workspaces, interactive Gantt charts, people workload views, milestones, @mention status updates, and more.
 
 ## Setup
 
@@ -28,7 +28,7 @@ Or start with an empty database — tables are created automatically when the ap
 flask --app app run
 ```
 
-Open http://127.0.0.1:5000 in your browser. You'll land on the workspace selector.
+Open http://127.0.0.1:5000 in your browser. You'll land on the Tideline workspace selector.
 
 ## Database Migrations
 
