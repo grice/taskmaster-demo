@@ -72,9 +72,10 @@ def import_db(input_dir):
         export_db(backup_dir)
         print(f'\nBackup complete. Proceeding with import...\n')
 
-        # Clear all data in reverse order to respect foreign keys
-        db.session.execute(status_update_mentions.delete())
-        db.session.execute(task_tags.delete())
+        # Clear all association tables first, then model tables. This avoids
+        # duplicate composite-key rows on re-import, especially in person_teams.
+        for filename, table, columns in reversed(ASSOC_TABLES):
+            db.session.execute(table.delete())
         for filename, model, columns in reversed(TABLES):
             db.session.query(model).delete()
         db.session.commit()
