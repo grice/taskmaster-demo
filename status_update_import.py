@@ -105,6 +105,20 @@ def import_status_updates_from_text(csv_text: str, workspace_slug: str, dry_run:
     summary = ImportSummary(workspace_slug=workspace_slug, dry_run=dry_run)
 
     for row_num, row in enumerate(reader, start=2):
+        extra_values = row.get(None) or []
+        if extra_values:
+            summary.errors += 1
+            summary.results.append(ImportRowResult(
+                row_num=row_num,
+                status='error',
+                message=(
+                    'Malformed CSV row with extra columns. '
+                    'If mentions contains multiple people, keep them in one quoted field like '
+                    '"Jane Smith,Sam Lee".'
+                ),
+            ))
+            continue
+
         project_name = (row.get('project_name') or '').strip()
         task_title = (row.get('task_title') or '').strip()
         content = (row.get('content') or '').strip()

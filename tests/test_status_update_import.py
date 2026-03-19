@@ -71,6 +71,21 @@ class TestStatusUpdateImportService:
         assert summary.errors == 1
         assert 'No task match' in summary.results[0].message
 
+    def test_unquoted_multiple_mentions_reports_clear_error(self, app, db):
+        project = make_project('Website Redesign')
+        make_task(project, 'Homepage QA')
+
+        summary = import_status_updates_from_text(
+            'project_name,task_title,content,mentions,external_id\n'
+            'Website Redesign,Homepage QA,"Blocked on legal copy",Jane Smith,Sam Lee,weekly-1\n',
+            workspace_slug='test',
+            dry_run=False,
+        )
+
+        assert summary.errors == 1
+        assert 'quoted field' in summary.results[0].message
+        assert StatusUpdate.query.count() == 0
+
 
 class TestStatusUpdateImportRoute:
     def test_import_page_renders(self, client):

@@ -40,6 +40,8 @@ Each row should represent one task status update.
   Comma-separated person names to associate with the update.
   Use exact person names when known.
   Leave blank if there are no mentions.
+  If there is more than one person, keep them in a single CSV field and quote that field.
+  Example: `"Jane Smith,Sam Lee"`
 
 - `external_id`
   A stable deduplication key for this specific update row.
@@ -81,6 +83,9 @@ Example:
 - Include only people who already exist in the workspace.
 - Use exact full names when available.
 - Separate multiple names with commas.
+- If there are multiple names, quote the whole field so CSV still treats it as one column.
+- Correct: `"Jane Smith,Sam Lee"`
+- Incorrect: `Jane Smith,Sam Lee` as separate unquoted columns in the row
 - Do not include `@` symbols.
 
 ## Example
@@ -88,7 +93,7 @@ Example:
 ```csv
 project_name,task_title,created_at,content,mentions,external_id
 Website Redesign,Homepage QA,2026-03-14 09:00:00,"Blocked on final legal copy. QA can resume once the revised language is approved.",Jane Smith,weekly-2026-03-14-web-website-redesign-homepage-qa
-Website Redesign,Launch Prep,2026-03-14 09:00:00,"Channel assets are approved and launch checklist review is scheduled for Monday.",Sam Lee,weekly-2026-03-14-marketing-website-redesign-launch-prep
+Website Redesign,Launch Prep,2026-03-14 09:00:00,"Channel assets are approved and launch checklist review is scheduled for Monday.","Jane Smith,Sam Lee",weekly-2026-03-14-marketing-website-redesign-launch-prep
 ```
 
 ## Final Check Before Returning CSV
