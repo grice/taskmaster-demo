@@ -1,3 +1,4 @@
+import base64
 import re
 from pathlib import Path
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, g, Response
@@ -39,13 +40,17 @@ def list_tasks():
 def import_status_updates():
     summary = None
     error = None
-    preview_csv_text = None
+    preview_csv_payload = None
     pasted_csv_text = ''
 
     if request.method == 'POST':
         csv_text = None
         if request.form.get('commit_preview') == '1':
-            csv_text = request.form.get('preview_csv_text', '')
+            payload = request.form.get('preview_csv_payload', '')
+            try:
+                csv_text = base64.b64decode(payload.encode('ascii')).decode('utf-8')
+            except (ValueError, UnicodeDecodeError):
+                error = 'The preview payload was invalid. Please run preview again.'
             dry_run = False
         else:
             dry_run = request.form.get('dry_run') == '1'
@@ -69,13 +74,13 @@ def import_status_updates():
                     dry_run=dry_run,
                 )
                 if dry_run:
-                    preview_csv_text = csv_text
+                    preview_csv_payload = base64.b64encode(csv_text.encode('utf-8')).decode('ascii')
             except ValueError as exc:
                 error = str(exc)
 
     return render_template('tasks/import_status_updates.html',
                            summary=summary, error=error,
-                           preview_csv_text=preview_csv_text,
+                           preview_csv_payload=preview_csv_payload,
                            pasted_csv_text=pasted_csv_text)
 
 

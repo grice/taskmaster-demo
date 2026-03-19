@@ -1,4 +1,5 @@
 import io
+import re
 from datetime import datetime
 
 from models import StatusUpdate
@@ -125,7 +126,7 @@ class TestStatusUpdateImportRoute:
 
         assert r.status_code == 200
         assert b'Preview' in r.data
-        assert b'Blocked on legal copy' not in r.data
+        assert b'Import Previewed File' in r.data
         assert StatusUpdate.query.count() == 0
 
     def test_upload_import_writes_updates(self, client, db):
@@ -181,10 +182,12 @@ class TestStatusUpdateImportRoute:
         assert preview.status_code == 200
         assert b'Import Previewed File' in preview.data
         assert StatusUpdate.query.count() == 0
+        match = re.search(rb'name="preview_csv_payload" value="([^"]+)"', preview.data)
+        assert match is not None
 
         commit = client.post(
             W + '/imports/status-updates',
-            data={'commit_preview': '1', 'preview_csv_text': csv_text},
+            data={'commit_preview': '1', 'preview_csv_payload': match.group(1).decode('ascii')},
         )
 
         assert commit.status_code == 200

@@ -48,7 +48,7 @@ class ImportSummary:
 def parse_created_at(raw: str, row_num: int) -> datetime:
     value = raw.strip()
     if not value:
-        return datetime.utcnow()
+        return datetime.now()
     normalized = value.replace('Z', '+00:00')
     try:
         return datetime.fromisoformat(normalized)
