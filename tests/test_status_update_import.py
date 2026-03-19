@@ -146,6 +146,23 @@ class TestStatusUpdateImportRoute:
         assert r.status_code == 200
         assert StatusUpdate.query.count() == 1
 
+    def test_pasted_csv_text_import_writes_updates(self, client, db):
+        project = make_project('Website Redesign')
+        make_task(project, 'Homepage QA')
+
+        csv_text = (
+            'project_name,task_title,content,external_id\n'
+            'Website Redesign,Homepage QA,"Blocked on legal copy",weekly-1\n'
+        )
+
+        r = client.post(
+            W + '/imports/status-updates',
+            data={'csv_text': csv_text},
+        )
+
+        assert r.status_code == 200
+        assert StatusUpdate.query.count() == 1
+
     def test_preview_can_be_committed_without_reupload(self, client, db):
         project = make_project('Website Redesign')
         make_task(project, 'Homepage QA')

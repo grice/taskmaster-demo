@@ -40,6 +40,7 @@ def import_status_updates():
     summary = None
     error = None
     preview_csv_text = None
+    pasted_csv_text = ''
 
     if request.method == 'POST':
         csv_text = None
@@ -47,15 +48,18 @@ def import_status_updates():
             csv_text = request.form.get('preview_csv_text', '')
             dry_run = False
         else:
-            upload = request.files.get('csv_file')
             dry_run = request.form.get('dry_run') == '1'
-            if not upload or not upload.filename:
-                error = 'Choose a CSV file to import.'
-            else:
+            pasted_csv_text = request.form.get('csv_text', '')
+            upload = request.files.get('csv_file')
+            if pasted_csv_text.strip():
+                csv_text = pasted_csv_text
+            elif upload and upload.filename:
                 try:
                     csv_text = upload.stream.read().decode('utf-8-sig')
                 except UnicodeDecodeError:
                     error = 'The uploaded file must be UTF-8 encoded.'
+            else:
+                error = 'Choose a CSV file or paste CSV text to import.'
 
         if csv_text is not None and not error:
             try:
@@ -71,7 +75,8 @@ def import_status_updates():
 
     return render_template('tasks/import_status_updates.html',
                            summary=summary, error=error,
-                           preview_csv_text=preview_csv_text)
+                           preview_csv_text=preview_csv_text,
+                           pasted_csv_text=pasted_csv_text)
 
 
 @bp.route('/imports/status-updates/parser-guide')
