@@ -3,6 +3,7 @@ import re
 from markupsafe import Markup, escape
 from flask import Flask, render_template, g
 from flask_migrate import Migrate
+from sqlalchemy import inspect, text
 from models import db, Project, Task, Person, Team, Milestone, Workspace
 from flask import url_for as flask_url_for
 from routes import register_blueprints
@@ -26,6 +27,7 @@ def create_app(test_config=None):
 
     with app.app_context():
         db.create_all()
+        ensure_compatible_schema()
 
     register_blueprints(app)
 
@@ -132,6 +134,18 @@ def create_app(test_config=None):
                                recent_projects=recent_projects)
 
     return app
+
+
+def ensure_compatible_schema():
+    """Apply tiny additive SQLite fixes for older local databases."""
+    inspector = inspect(db.engine)
+    if 'status_update' not in inspector.get_table_names():
+        return
+
+    columns = {col['name'] for col in inspector.get_columns('status_update')}
+    if 'external_id' not in columns:
+        db.session.execute(text('ALTER TABLE status_update ADD COLUMN external_id VARCHAR(255)'))
+        db.session.commit()
 
 
 if __name__ == '__main__':

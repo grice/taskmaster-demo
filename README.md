@@ -67,6 +67,25 @@ python dbutil.py import mybackup     # reads from ./mybackup/
 
 Import replaces all existing data. You will be prompted to confirm before proceeding.
 
+## Bulk Status Update Import
+
+Tideline supports bulk task status updates from CSV.
+
+- Web UI: open a workspace, go to [Tasks], then use `Import Updates`
+- CLI: `python import_status_updates.py <workspace_slug> <csv_path> [--dry-run]`
+
+Expected CSV columns:
+
+```csv
+project_name,task_title,created_at,content,mentions,external_id
+```
+
+- Required: `project_name`, `task_title`, `content`
+- Optional: `created_at`, `mentions`, `external_id`
+- `external_id` is used to skip duplicates on reruns within the same workspace
+
+Parser instructions for an AI that converts document-based status notes into this CSV live in `STATUS_UPDATE_PARSER.md`.
+
 ## Features
 
 ### Workspaces

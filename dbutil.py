@@ -26,7 +26,7 @@ TABLES = [
     ('task_assignments.csv', TaskAssignment, ['id', 'task_id', 'person_id', 'is_lead']),
     ('task_dependencies.csv', TaskDependency, ['id', 'task_id', 'depends_on_id']),
     ('milestones.csv', Milestone, ['id', 'task_id', 'name', 'date', 'status_override']),
-    ('status_updates.csv', StatusUpdate, ['id', 'task_id', 'content', 'created_at']),
+    ('status_updates.csv', StatusUpdate, ['id', 'task_id', 'content', 'created_at', 'external_id']),
 ]
 
 # Many-to-many association tables

@@ -14,7 +14,10 @@
             {% endif %}
         </h1>
     </div>
-    <a href="{{ url_for('projects.list_projects') }}" class="btn btn-outline-secondary btn-sm">All Projects</a>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('tasks.import_status_updates') }}" class="btn btn-primary btn-sm">Import Updates</a>
+        <a href="{{ url_for('projects.list_projects') }}" class="btn btn-outline-secondary btn-sm">All Projects</a>
+    </div>
 </div>
 
 {% if tasks %}

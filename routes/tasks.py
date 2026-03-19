@@ -1,7 +1,9 @@
 import re
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, g
+from pathlib import Path
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, g, Response
 from models import db, Task, TaskAssignment, Project, Person, Tag, StatusUpdate, TaskDependency, Milestone, Workspace
 from datetime import date
+from status_update_import import import_status_updates_from_text
 
 bp = Blueprint('tasks', __name__)
 
@@ -31,6 +33,89 @@ def list_tasks():
     return render_template('tasks/list.html', tasks=tasks,
                            status_filter=status_filter, overdue=overdue,
                            today=date.today())
+
+
+@bp.route('/imports/status-updates', methods=['GET', 'POST'])
+def import_status_updates():
+    summary = None
+    error = None
+    preview_csv_text = None
+
+    if request.method == 'POST':
+        csv_text = None
+        if request.form.get('commit_preview') == '1':
+            csv_text = request.form.get('preview_csv_text', '')
+            dry_run = False
+        else:
+            upload = request.files.get('csv_file')
+            dry_run = request.form.get('dry_run') == '1'
+            if not upload or not upload.filename:
+                error = 'Choose a CSV file to import.'
+            else:
+                try:
+                    csv_text = upload.stream.read().decode('utf-8-sig')
+                except UnicodeDecodeError:
+                    error = 'The uploaded file must be UTF-8 encoded.'
+
+        if csv_text is not None and not error:
+            try:
+                summary = import_status_updates_from_text(
+                    csv_text,
+                    workspace_slug=g.workspace.slug,
+                    dry_run=dry_run,
+                )
+                if dry_run:
+                    preview_csv_text = csv_text
+            except ValueError as exc:
+                error = str(exc)
+
+    return render_template('tasks/import_status_updates.html',
+                           summary=summary, error=error,
+                           preview_csv_text=preview_csv_text)
+
+
+@bp.route('/imports/status-updates/parser-guide')
+def download_status_update_parser_guide():
+    guide = build_workspace_parser_guide(g.workspace)
+    filename = f'{g.workspace.slug}-status-update-parser.md'
+    return Response(
+        guide,
+        mimetype='text/markdown; charset=utf-8',
+        headers={
+            'Content-Disposition': f'attachment; filename="{filename}"',
+        },
+    )
+
+
+def build_workspace_parser_guide(workspace: Workspace) -> str:
+    base_guide = Path('STATUS_UPDATE_PARSER.md').read_text(encoding='utf-8').strip()
+    projects = Project.query.filter_by(workspace_id=workspace.id).order_by(Project.name).all()
+    people = Person.query.filter_by(workspace_id=workspace.id).order_by(Person.name).all()
+
+    project_lines = []
+    for project in projects:
+        project_lines.append(f'- {project.name}')
+        tasks = Task.query.filter_by(workspace_id=workspace.id, project_id=project.id).order_by(Task.title).all()
+        if tasks:
+            for task in tasks:
+                project_lines.append(f'  - {task.title}')
+        else:
+            project_lines.append('  - (no tasks)')
+
+    people_lines = [f'- {person.name}' for person in people] or ['- (no people)']
+    projects_and_tasks = '\n'.join(project_lines)
+    people_section = '\n'.join(people_lines)
+
+    return (
+        f'{base_guide}\n\n'
+        '## Current Workspace Reference\n\n'
+        f'- Workspace name: {workspace.name}\n'
+        f'- Workspace slug: {workspace.slug}\n\n'
+        '### Projects And Tasks\n\n'
+        f'{projects_and_tasks}\n\n'
+        '### People\n\n'
+        f'{people_section}\n'
+    )
 
 
 @bp.route('/tasks/new', methods=['GET', 'POST'])

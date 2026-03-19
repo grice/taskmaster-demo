@@ -1,0 +1,4 @@
+project_name,task_title,created_at,content,mentions,external_id
+Website Redesign,Frontend implementation,2026-03-18 09:00:00,"Navigation shell is in place and responsive layout work is underway. Waiting on final copy for a few content-heavy sections.","Alice Chen,Frank Lee",weekly-2026-03-18-engineering-website-redesign-frontend-implementation
+Website Redesign,Backend API,2026-03-18 09:00:00,"Auth endpoints are functional and the team is finishing validation and error handling before handoff to frontend.","Bob Martinez,Alice Chen",weekly-2026-03-18-engineering-website-redesign-backend-api
+Infrastructure Upgrade,K8s cluster setup,2026-03-18 09:00:00,"Cluster provisioning is complete. Networking and RBAC hardening remain before CI/CD setup can begin.","Frank Lee,Bob Martinez",weekly-2026-03-18-engineering-infrastructure-upgrade-k8s-cluster-setup
