@@ -88,6 +88,10 @@ def import_db(input_dir):
             with open(path, 'r', newline='') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
+                    # Fill missing columns with None so older backups still import
+                    # after additive schema changes like StatusUpdate.external_id.
+                    for col in columns:
+                        row.setdefault(col, None)
                     # Convert empty strings to None for nullable fields
                     for key in row:
                         if row[key] == '':
@@ -106,7 +110,7 @@ def import_db(input_dir):
                             row[col] = datetime.fromisoformat(row[col])
                     if 'is_lead' in row and row['is_lead'] is not None:
                         row['is_lead'] = row['is_lead'] in ('True', 'true', '1')
-                    obj = model(**{c: row[c] for c in columns})
+                    obj = model(**{c: row.get(c) for c in columns})
                     db.session.add(obj)
                     count += 1
             db.session.flush()
