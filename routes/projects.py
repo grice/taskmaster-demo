@@ -167,7 +167,7 @@ def export_excel(id):
         fill = row_fill_even if row_idx % 2 == 0 else None
         assignees = ', '.join(
             (a.person.name + (' (lead)' if a.is_lead else ''))
-            for a in task.assignments
+            for a in task.assignments if a.person
         ) or 'Unassigned'
         tags = ', '.join(t.name for t in task.tags)
 
@@ -242,6 +242,8 @@ def gantt_data(id):
         lead = task.lead
         assignee_names = []
         for a in task.assignments:
+            if not a.person:
+                continue
             name = a.person.name
             if a.is_lead:
                 name += ' (lead)'

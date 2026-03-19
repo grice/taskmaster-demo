@@ -87,13 +87,13 @@ class Task(db.Model):
     @property
     def lead(self):
         for a in self.assignments:
-            if a.is_lead:
+            if a.is_lead and a.person:
                 return a.person
         return None
 
     @property
     def assignees(self):
-        return [a.person for a in self.assignments]
+        return [a.person for a in self.assignments if a.person]
 
     @property
     def progress(self):

@@ -55,6 +55,14 @@ class TestTaskAssignees:
         db.session.commit()
         assert t.lead is None
 
+    def test_missing_person_assignment_is_ignored(self, db):
+        p = make_project()
+        t = make_task(p)
+        db.session.add(TaskAssignment(task_id=t.id, person_id=999999, is_lead=True))
+        db.session.commit()
+        assert t.lead is None
+        assert t.assignees == []
+
 
 class TestMilestoneComputedStatus:
     def test_manual_override_takes_precedence(self, db):
