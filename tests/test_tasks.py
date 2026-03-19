@@ -1,6 +1,6 @@
 """Tests for task CRUD routes, filtering, milestones, and status updates."""
 import json
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from models import Task, Milestone, StatusUpdate
 from tests.conftest import make_project, make_task, make_milestone, make_person, W
 
@@ -196,6 +196,7 @@ class TestStatusUpdates:
     def test_add_status_update(self, client, db):
         p = make_project()
         t = make_task(p)
+        before = datetime.now() - timedelta(seconds=2)
         r = client.post(f'{W}/tasks/{t.id}/status',
                         data={'content': 'Work is going well'},
                         follow_redirects=True)
@@ -203,6 +204,7 @@ class TestStatusUpdates:
         update = StatusUpdate.query.filter_by(task_id=t.id).first()
         assert update is not None
         assert update.content == 'Work is going well'
+        assert update.created_at >= before
 
     def test_empty_update_ignored(self, client, db):
         p = make_project()

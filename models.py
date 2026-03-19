@@ -149,7 +149,7 @@ class StatusUpdate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     external_id = db.Column(db.String(255), nullable=True, index=True)
     mentions = db.relationship('Person', secondary=status_update_mentions,
                                backref=db.backref('mentioned_in', lazy=True))

@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, g, Response
 from models import db, Task, TaskAssignment, Project, Person, Tag, StatusUpdate, TaskDependency, Milestone, Workspace
-from datetime import date
+from datetime import date, datetime
 from status_update_import import import_status_updates_from_text
 
 bp = Blueprint('tasks', __name__)
@@ -253,7 +253,7 @@ def add_status_update(id):
     task = Task.query.filter_by(id=id, workspace_id=g.workspace.id).first_or_404()
     content = request.form.get('content', '').strip()
     if content:
-        update = StatusUpdate(task_id=task.id, content=content)
+        update = StatusUpdate(task_id=task.id, content=content, created_at=datetime.now())
         db.session.add(update)
         db.session.flush()
 
