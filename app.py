@@ -2,12 +2,18 @@ import os
 import re
 from markupsafe import Markup, escape
 from flask import Flask, render_template, g
-from flask_migrate import Migrate
 from sqlalchemy import inspect, text
 from models import db, Project, Task, Person, Team, Milestone, Workspace
 from flask import url_for as flask_url_for
 from routes import register_blueprints
 from datetime import date
+
+try:
+    from flask_migrate import Migrate
+except ModuleNotFoundError:
+    class Migrate:
+        def init_app(self, app, db):
+            return None
 
 migrate = Migrate()
 

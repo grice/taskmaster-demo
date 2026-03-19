@@ -18,6 +18,10 @@ from app import create_app
 from models import db, Workspace, Team, Person, Tag, Project, Task, TaskAssignment, TaskDependency
 
 
+def fail(message: str):
+    raise SystemExit(message)
+
+
 def slugify(name: str) -> str:
     s = name.lower().strip()
     s = re.sub(r'[^\w\s-]', '', s)
@@ -33,7 +37,7 @@ def parse_date(s: str, field: str, row_num: int) -> date:
     try:
         return date.fromisoformat(s)
     except ValueError:
-        sys.exit(f"Error: invalid date {s!r} in {field} (row {row_num})")
+        fail(f"Error: invalid date {s!r} in {field} (row {row_num})")
 
 
 def load_people_csv(path: Path, workspace_id: int) -> tuple[dict, dict]:
@@ -52,7 +56,9 @@ def load_people_csv(path: Path, workspace_id: int) -> tuple[dict, dict]:
             continue
         name = row['name'].strip()
         if not name:
-            sys.exit(f"Error: empty team name at people.csv row {i}")
+            fail(f"Error: empty team name at people.csv row {i}")
+        if name in team_by_name:
+            fail(f"Error: duplicate team name {name!r} at people.csv row {i}")
         team = Team(name=name, workspace_id=workspace_id)
         db.session.add(team)
         team_by_name[name] = team
@@ -66,7 +72,9 @@ def load_people_csv(path: Path, workspace_id: int) -> tuple[dict, dict]:
             continue
         name = row['name'].strip()
         if not name:
-            sys.exit(f"Error: empty person name at people.csv row {i}")
+            fail(f"Error: empty person name at people.csv row {i}")
+        if name in person_by_name:
+            fail(f"Error: duplicate person name {name!r} at people.csv row {i}")
         email = row.get('email', '').strip() or None
         person = Person(name=name, email=email, workspace_id=workspace_id)
         db.session.add(person)
@@ -111,7 +119,9 @@ def load_plan_csv(path: Path, workspace_id: int, person_by_name: dict) -> tuple[
         if rtype == 'project':
             name = row['name'].strip()
             if not name:
-                sys.exit(f"Error: empty project name at plan.csv row {i}")
+                fail(f"Error: empty project name at plan.csv row {i}")
+            if any(pr['name'] == name for pr in project_rows):
+                fail(f"Error: duplicate project name {name!r} at plan.csv row {i}")
             project_rows.append({'row': i, 'name': name,
                                   'description': row.get('description', '').strip(),
                                   'start_date': row.get('start_date', '').strip(),
@@ -121,14 +131,16 @@ def load_plan_csv(path: Path, workspace_id: int, person_by_name: dict) -> tuple[
 
         elif rtype == 'task':
             if current_project_name is None:
-                sys.exit(f"Error: task at plan.csv row {i} has no preceding project row")
+                fail(f"Error: task at plan.csv row {i} has no preceding project row")
             name = row['name'].strip()
             if not name:
-                sys.exit(f"Error: empty task name at plan.csv row {i}")
+                fail(f"Error: empty task name at plan.csv row {i}")
+            if any(tr['name'] == name for tr in task_rows):
+                fail(f"Error: duplicate task name {name!r} at plan.csv row {i}; task titles must be unique within an import so dependencies are unambiguous")
             start_str = row.get('start_date', '').strip()
             end_str = row.get('end_date', '').strip()
             if not start_str or not end_str:
-                sys.exit(f"Error: task {name!r} (row {i}) is missing start_date or end_date")
+                fail(f"Error: task {name!r} (row {i}) is missing start_date or end_date")
             task_rows.append({
                 'row': i,
                 'name': name,
@@ -143,7 +155,7 @@ def load_plan_csv(path: Path, workspace_id: int, person_by_name: dict) -> tuple[
                 'depends_on': row.get('depends_on', '').strip(),
             })
         else:
-            sys.exit(f"Error: unknown type {row.get('type')!r} at plan.csv row {i}")
+            fail(f"Error: unknown type {row.get('type')!r} at plan.csv row {i}")
 
     # ── Create projects ───────────────────────────────────────────────────────
     project_by_name: dict[str, Project] = {}
@@ -248,7 +260,7 @@ def load_plan_csv(path: Path, workspace_id: int, person_by_name: dict) -> tuple[
 
 def main():
     if len(sys.argv) < 2:
-        sys.exit("Usage: python workspace_import.py <workspace_name> [input_dir]")
+        fail("Usage: python workspace_import.py <workspace_name> [input_dir]")
 
     workspace_name = sys.argv[1]
     input_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path('import')
@@ -257,7 +269,7 @@ def main():
     people_path = input_dir / 'people.csv'
 
     if not plan_path.exists():
-        sys.exit(f"Error: {plan_path} not found")
+        fail(f"Error: {plan_path} not found")
 
     slug = slugify(workspace_name)
 
@@ -266,7 +278,7 @@ def main():
         try:
             # Abort if workspace slug already taken
             if Workspace.query.filter_by(slug=slug).first():
-                sys.exit(f"Error: workspace with slug {slug!r} already exists")
+                fail(f"Error: workspace with slug {slug!r} already exists")
 
             # Create workspace
             ws = Workspace(name=workspace_name, slug=slug)
@@ -301,10 +313,11 @@ def main():
             print("Done.")
 
         except SystemExit:
+            db.session.rollback()
             raise
         except Exception as e:
             db.session.rollback()
-            sys.exit(f"Error: {e}")
+            fail(f"Error: {e}")
 
 
 if __name__ == '__main__':
